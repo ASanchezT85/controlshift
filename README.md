@@ -134,11 +134,19 @@ login.
 - **Reviews sit beside findings, never on top of them.** An override records
   reviewer, reason and timestamp; the original finding stays in the stored
   `AnalysisResult`.
-- **Malware scanning is not wired.** Uploaded artifacts stay `RECEIVED` and
-  analysis refuses to consume them until a scanner marks them `SCANNED`, or an
-  operator sets `ALLOW_UNSCANNED_ARTIFACTS=true` in a dev environment. The
-  refusal is real: it is the default, the console shows it on the artifact row,
-  and `uploads.test.ts` fails if an upload is ever marked scanned on arrival.
+- **Malware scanning speaks clamd's INSTREAM protocol directly** — no
+  dependency, and no third-party service: a customer's PLC source must not
+  leave the deployment (SPEC 42), so an upload-to-cloud scanner is not an
+  option. Point `CLAMD_HOST` at the `clamav` service in
+  `infra/docker-compose.yml`.
+- **The scanner fails closed.** Unreachable daemon, timeout, protocol garbage,
+  size limit — every failure path returns UNAVAILABLE, never CLEAN. With no
+  scanner configured, uploads stay `RECEIVED`, analysis refuses them, and the
+  API says so at startup. `ALLOW_UNSCANNED_ARTIFACTS=true` overrides that for
+  development only.
+- **Infected bytes never reach the object store.** The scan runs before
+  anything is written, so a rejection leaves nothing to clean up. The upload
+  returns 400 with the signature and the rejection is audited.
 - **Intake refuses rather than inspects.** Archives and executables are rejected
   by extension; nothing is unpacked, so there is no archive bomb to bound. The
   extension only *suggests* a type - a PDF is an electrical drawing or a network

@@ -18,6 +18,7 @@ import { AuditModule, AuditService } from './audit';
 import { AuthGuard, AuthModule, CurrentUser, Principal, Roles } from './auth';
 import { OpportunitiesModule, OpportunitiesService } from './opportunities';
 import { PrismaService } from './prisma.service';
+import { ScannerModule, ScannerService } from './scanner';
 
 /// SPEC 12: size ceiling, extension allowlist, hash, immutable store.
 export const MAX_ARTIFACT_BYTES = Number(process.env.MAX_ARTIFACT_BYTES ?? 100 * 1024 * 1024);
@@ -53,13 +54,10 @@ export function storageRoot(): string {
   return resolve(process.env.STORAGE_ROOT ?? join(process.cwd(), 'storage'));
 }
 
-/// Malware scanning (SPEC 12). No scanner is wired in V1. Rather than pretend
-/// a file is clean, an unscanned artifact stays RECEIVED and analysis refuses
-/// to consume it unless the operator explicitly accepts the risk in a
+/// What an unscannable artifact becomes when no scanner could answer. Never
+/// SCANNED unless an operator has explicitly accepted the risk for a
 /// development environment.
-// ponytail: env-gated stub, not a plugin architecture. Wire a real ClamAV/
-// vendor scan here when the first customer artifact arrives.
-export function scanStatus(): ProcessingStatus {
+export function unscannedStatus(): ProcessingStatus {
   return process.env.ALLOW_UNSCANNED_ARTIFACTS === 'true'
     ? ProcessingStatus.SCANNED
     : ProcessingStatus.RECEIVED;
@@ -70,6 +68,7 @@ export class ArtifactsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly opportunities: OpportunitiesService,
+    private readonly scanner: ScannerService,
     private readonly audit: AuditService,
   ) {}
 
@@ -107,6 +106,21 @@ export class ArtifactsService {
     });
     if (existing) return existing;
 
+    // Scanned BEFORE anything is written. Known-malicious bytes never reach the
+    // object store, so there is nothing to clean up afterwards.
+    const scan = await this.scanner.scan(body);
+    if (scan.status === 'INFECTED') {
+      await this.audit.record(user.tenantId, user.userId, 'artifact.rejected', 'Artifact', sha256, {
+        opportunityId,
+        filename,
+        sha256,
+        signature: scan.signature,
+      });
+      throw new BadRequestException(
+        `${filename} was rejected by malware scanning: ${scan.signature}`,
+      );
+    }
+
     // Content-addressed and write-once: an original is never overwritten
     // (SPEC 11). Two uploads of identical bytes resolve to the same object.
     const relative = join('original', user.tenantId, sha256.slice(0, 2), sha256);
@@ -127,7 +141,8 @@ export class ArtifactsService {
         sha256,
         size: body.length,
         storageLocation: relative.split('\\').join('/'),
-        processingStatus: scanStatus(),
+        processingStatus: scan.status === 'CLEAN' ? ProcessingStatus.SCANNED : unscannedStatus(),
+        rejectionReason: scan.status === 'UNAVAILABLE' ? scan.detail : null,
       },
     });
     await this.audit.record(user.tenantId, user.userId, 'artifact.uploaded', 'Artifact', artifact.id, {
@@ -135,6 +150,8 @@ export class ArtifactsService {
       filename,
       sha256,
       size: body.length,
+      scan: scan.status,
+      scanDetail: scan.detail,
     });
     return artifact;
   }
@@ -176,7 +193,7 @@ export class ArtifactsController {
 }
 
 @Module({
-  imports: [AuthModule, AuditModule, OpportunitiesModule],
+  imports: [AuthModule, AuditModule, OpportunitiesModule, ScannerModule],
   controllers: [ArtifactsController],
   providers: [ArtifactsService, PrismaService],
   exports: [ArtifactsService],

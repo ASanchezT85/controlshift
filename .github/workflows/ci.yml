@@ -66,6 +66,8 @@ jobs:
       - run: node --test services/api/dist/commercial.test.js
       # Branding, including the logo scheme validation.
       - run: node --test services/api/dist/branding.test.js
+      # The clamd protocol is hand-written and must fail closed.
+      - run: node --test services/api/dist/scanner.test.js
 
   web:
     runs-on: ubuntu-latest

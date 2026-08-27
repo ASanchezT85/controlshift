@@ -14,5 +14,22 @@ services:
       timeout: 3s
       retries: 20
 
+  # Malware scanning for artifact intake (MASTER SPEC 12). The API speaks
+  # clamd's INSTREAM protocol directly; point CLAMD_HOST at this service.
+  # First start downloads the signature database and takes a few minutes -
+  # until it is ready, uploads stay RECEIVED and analysis refuses them, which
+  # is the correct behaviour rather than a failure.
+  clamav:
+    image: clamav/clamav:stable
+    ports: ["3310:3310"]
+    volumes: ["clamdb:/var/lib/clamav"]
+    healthcheck:
+      test: ["CMD-SHELL", "clamdscan --ping 1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 5m
+
 volumes:
   pgdata:
+  clamdb:
