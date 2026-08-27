@@ -73,6 +73,14 @@ that path and no default ControlShift claims as universal.
 - **Originals are content-addressed and write-once.** Uploads land under
   `storage/original/<tenant>/<sha>` with `flag: 'wx'`. Re-analysis writes a new
   `Analysis` row; no assessment is ever overwritten.
+- **An exclusion is not an exclusion until commerce approves it.** Proposals
+  appear in the Proposal Input Package under `Proposed exclusions - NOT
+  APPROVED`, and the scope above still carries them. Engineering validates
+  assumptions, commerce approves exclusions, and neither role can perform the
+  other's act (SPEC 37).
+- **Propose from analysis drafts; it never approves.** It refuses to touch a
+  `RESOLVE_BEFORE_QUOTE` unknown at all: that cannot be assumed away or excluded
+  into safety, only answered.
 - **Reviews sit beside findings, never on top of them.** An override records
   reviewer, reason and timestamp; the original finding stays in the stored
   `AnalysisResult`.

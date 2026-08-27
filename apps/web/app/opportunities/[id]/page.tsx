@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { use, useCallback, useEffect, useState } from 'react';
 import { api, sessionUser, token } from '@/lib/api';
 import ArtifactsCard from './ArtifactsCard';
+import CommercialCard, { type Assumption, type Exclusion } from './CommercialCard';
 
 const API = process.env.NEXT_PUBLIC_API ?? 'http://127.0.0.1:3000/api';
 
@@ -81,7 +82,7 @@ interface AnalysisResult {
     blocking_findings: string[];
     notes: string[];
   }[];
-  work_packages: { code: string; quantity: number; triggered_by: string[] }[];
+  work_packages: { code: string; unit_type: string; quantity: number; triggered_by: string[] }[];
   candidate_bom: { catalog: string; quantity: number; replaces: string; state: string }[];
   quote_readiness: {
     fixed_price: string;
@@ -123,6 +124,10 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [estimate, setEstimate] = useState<Estimate | null>(null);
   const [reports, setReports] = useState<ReportRow[]>([]);
+  const [commercial, setCommercial] = useState<{
+    assumptions: Assumption[];
+    exclusions: Exclusion[];
+  }>({ assumptions: [], exclusions: [] });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [generating, setGenerating] = useState('');
@@ -149,6 +154,15 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
       setReports(await api<ReportRow[]>(`/opportunities/${id}/reports`));
     } catch {
       setReports([]);
+    }
+    try {
+      setCommercial(
+        await api<{ assumptions: Assumption[]; exclusions: Exclusion[] }>(
+          `/opportunities/${id}/commercial`,
+        ),
+      );
+    } catch {
+      setCommercial({ assumptions: [], exclusions: [] });
     }
   }, [id]);
 
@@ -445,15 +459,17 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
                 <thead>
                   <tr>
                     <th>Package</th>
-                    <th>Units</th>
+                    <th>Qty</th>
+                    <th>Unit</th>
                     <th>Triggered by</th>
                   </tr>
                 </thead>
                 <tbody>
                   {r.work_packages.map((w) => (
-                    <tr key={w.code}>
+                    <tr key={`${w.code}-${w.unit_type}`}>
                       <td>{w.code.replace(/_/g, ' ')}</td>
                       <td>{w.quantity}</td>
+                      <td className="muted">{w.unit_type.toLowerCase()}</td>
                       <td className="muted">{w.triggered_by.join(', ')}</td>
                     </tr>
                   ))}
@@ -526,6 +542,15 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
               </ul>
             </div>
           )}
+
+          <CommercialCard
+            opportunityId={id}
+            role={sessionUser()?.role ?? 'VIEWER'}
+            assumptions={commercial.assumptions}
+            exclusions={commercial.exclusions}
+            hasAnalysis={!!analysis}
+            onChange={load}
+          />
 
           <div className="card">
             <h2>Deliverables</h2>

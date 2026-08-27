@@ -252,3 +252,15 @@ select {
   background: var(--surface);
   color: var(--text);
 }
+
+.inline-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.inline-form input {
+  flex: 1 1 200px;
+  width: auto;
+}

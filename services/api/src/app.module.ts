@@ -3,6 +3,7 @@ import { AnalysesModule } from './analyses';
 import { ArtifactsModule } from './artifacts';
 import { AuditModule } from './audit';
 import { AuthModule } from './auth';
+import { CommercialModule } from './commercial';
 import { EstimatingModule } from './estimating';
 import { OpportunitiesModule } from './opportunities';
 import { ReportsModule } from './reports';
@@ -14,6 +15,7 @@ import { ReportsModule } from './reports';
     ArtifactsModule,
     AnalysesModule,
     EstimatingModule,
+    CommercialModule,
     ReportsModule,
     AuditModule,
   ],

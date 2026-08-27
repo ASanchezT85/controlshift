@@ -18,6 +18,7 @@ import { dirname, join } from 'node:path';
 import { IsIn } from 'class-validator';
 import { AuditModule, AuditService } from './audit';
 import { AuthGuard, AuthModule, CurrentUser, Principal, Roles } from './auth';
+import { CommercialModule, CommercialService } from './commercial';
 import { EstimatingModule, EstimatingService, type Estimate } from './estimating';
 import { PrismaService } from './prisma.service';
 import { storageRoot } from './artifacts';
@@ -59,6 +60,20 @@ interface Ctx {
   analysis: { id: string; rulePackVersion: string; analysisEngineVersion: string; startedAt: Date };
   result: any;
   estimate: Estimate | null;
+  assumptions: Array<{
+    statement: string;
+    basis: string;
+    consequenceIfFalse: string;
+    validationState: string;
+    affectedScope: string[];
+  }>;
+  exclusions: Array<{
+    scopeArea: string;
+    reason: string;
+    relatedUnknowns: string[];
+    approvedBy: string | null;
+    approvedAt: Date | null;
+  }>;
   generatedByName: string;
   generatedAt: string;
 }
@@ -224,9 +239,8 @@ function proposalInputPackage(ctx: Ctx): string {
       })
       .join('<br>');
 
-  const proposedExclusions = r.unknowns.filter(
-    (u: any) => u.estimate_allowance_profile === 'EXCLUDE_OR_ALLOWANCE',
-  );
+  const approvedExclusions = ctx.exclusions.filter((e) => e.approvedBy);
+  const proposedExclusions = ctx.exclusions.filter((e) => !e.approvedBy);
   const blockers = r.unknowns.filter((u: any) => u.estimate_allowance_profile === 'RESOLVE_BEFORE_QUOTE');
 
   return shell(
@@ -278,31 +292,45 @@ ${e.unpriced
       : '<p class="muted">No estimate available: this organization has no effort templates configured.</p>'}
 
 <h2>Assumptions</h2>
-<p class="muted">Proposed, pending commercial approval. Each is a proposition accepted temporarily
-for estimating and becomes false the moment the underlying evidence arrives.</p>
-<table><thead><tr><th>Assumption</th><th>Consequence if false</th></tr></thead><tbody>
-<tr><td>The supplied PLC source is the program currently running on the line.</td>
-    <td class="muted">The reconstructed system model, and every count derived from it, is wrong.</td></tr>
-<tr><td>Field wiring matches the supplied I/O list where as-built drawings are absent.</td>
-    <td class="muted">Panel retrofit and I/O checkout scope grows by an unquantified amount.</td></tr>
-${proposedExclusions
-      .map(
-        (u: any) =>
-          `<tr><td>${esc(u.missing_information)} is outside the delivered scope.</td>
-            <td class="muted">${esc(u.commercial_impact)}</td></tr>`,
-      )
-      .join('')}
-</tbody></table>
+<p class="muted">Each is a proposition accepted temporarily for estimating, with the consequence of
+being wrong stated next to it. An assumption that has been invalidated stays listed: the scope built
+on it is what has to be revisited.</p>
+${ctx.assumptions.length
+      ? `<table><thead><tr><th>Assumption</th><th>Basis</th><th>Consequence if false</th><th>State</th></tr></thead><tbody>
+${ctx.assumptions
+          .map(
+            (a) =>
+              `<tr><td>${esc(a.statement)}</td><td class="muted">${esc(a.basis)}</td>
+                <td class="muted">${esc(a.consequenceIfFalse)}</td>
+                <td class="state ${a.validationState === 'INVALIDATED' ? 'BLOCKED' : a.validationState === 'VALIDATED' ? 'PASS' : 'UNKNOWN'}">
+                  ${esc(a.validationState)}</td></tr>`,
+          )
+          .join('')}
+</tbody></table>`
+      : '<p class="muted">None recorded. Nothing in this package rests on a stated assumption.</p>'}
 
-<h2>Proposed exclusions</h2>
-<table><thead><tr><th>Scope area</th><th>Reason</th><th>Related unknown</th></tr></thead><tbody>
+<h2>Exclusions</h2>
+${approvedExclusions.length
+      ? `<table><thead><tr><th>Scope area</th><th>Reason</th><th>Related unknown</th></tr></thead><tbody>
+${approvedExclusions
+          .map(
+            (e) =>
+              `<tr><td>${esc(e.scopeArea)}</td><td class="muted">${esc(e.reason)}</td>
+                <td class="muted">${esc(e.relatedUnknowns.join(', ') || '—')}</td></tr>`,
+          )
+          .join('')}
+</tbody></table>`
+      : '<p class="muted">No exclusion has been approved. Nothing is excluded from this scope.</p>'}
+${proposedExclusions.length
+      ? `<h2>Proposed exclusions — NOT APPROVED</h2>
+<p class="muted">These have not been approved by a commercial reviewer and are therefore NOT
+excluded from the scope above. They are shown so the decision is visible rather than implied.</p>
+<table><thead><tr><th>Scope area</th><th>Reason</th></tr></thead><tbody>
 ${proposedExclusions
-      .map(
-        (u: any) =>
-          `<tr><td>${esc(u.affected_domains.join(', '))}</td><td class="muted">${esc(u.commercial_impact)}</td><td class="muted">${esc(u.id)}</td></tr>`,
-      )
-      .join('') || '<tr><td colspan="3" class="muted">None proposed.</td></tr>'}
-</tbody></table>
+          .map((e) => `<tr><td>${esc(e.scopeArea)}</td><td class="muted">${esc(e.reason)}</td></tr>`)
+          .join('')}
+</tbody></table>`
+      : ''}
 
 <h2>Allowances and blockers</h2>
 <table><thead><tr><th>Unknown</th><th>Profile</th><th>Commercial treatment</th></tr></thead><tbody>
@@ -387,6 +415,7 @@ export class ReportsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly estimating: EstimatingService,
+    private readonly commercial: CommercialService,
     private readonly audit: AuditService,
   ) {}
 
@@ -408,6 +437,8 @@ export class ReportsService {
         ? await this.estimating.estimate(user.tenantId, opportunityId).catch(() => null)
         : null;
 
+    const { assumptions, exclusions } = await this.commercial.list(user.tenantId, opportunityId);
+
     const html = RENDERERS[kind]({
       kind,
       tenant,
@@ -415,6 +446,8 @@ export class ReportsService {
       analysis,
       result: analysis.result as any,
       estimate,
+      assumptions,
+      exclusions,
       generatedByName: user.email,
       generatedAt: new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
     });
@@ -495,7 +528,7 @@ export class ReportsController {
 }
 
 @Module({
-  imports: [AuthModule, AuditModule, EstimatingModule],
+  imports: [AuthModule, AuditModule, EstimatingModule, CommercialModule],
   controllers: [ReportsController],
   providers: [ReportsService, PrismaService],
 })
