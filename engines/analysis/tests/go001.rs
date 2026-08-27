@@ -365,7 +365,10 @@ fn work_packages_never_mix_units() {
     // Every (code, unit) pair appears exactly once.
     let mut seen = std::collections::HashSet::new();
     for w in wps {
-        let key = (w["code"].as_str().unwrap(), w["unit_type"].as_str().unwrap());
+        let key = (
+            w["code"].as_str().unwrap(),
+            w["unit_type"].as_str().unwrap(),
+        );
         assert!(seen.insert(key), "duplicate work package line {key:?}");
         assert!(
             !w["unit_type"].as_str().unwrap().is_empty(),

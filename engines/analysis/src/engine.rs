@@ -452,20 +452,20 @@ fn work_packages(findings: &[Finding]) -> Vec<WorkPackageRef> {
     for f in findings {
         let unit = f.unit_type.clone();
         for wp in &f.work_packages {
-            let e = acc
-                .entry((wp.clone(), unit.clone()))
-                .or_insert((0, vec![]));
+            let e = acc.entry((wp.clone(), unit.clone())).or_insert((0, vec![]));
             e.0 += f.quantity.unwrap_or(1);
             e.1.push(f.id.clone());
         }
     }
     acc.into_iter()
-        .map(|((code, unit_type), (quantity, triggered_by))| WorkPackageRef {
-            code,
-            unit_type,
-            quantity,
-            triggered_by,
-        })
+        .map(
+            |((code, unit_type), (quantity, triggered_by))| WorkPackageRef {
+                code,
+                unit_type,
+                quantity,
+                triggered_by,
+            },
+        )
         .collect()
 }
 
