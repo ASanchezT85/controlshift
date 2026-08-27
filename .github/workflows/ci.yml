@@ -1,0 +1,28 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      # Unit + parser + GO-001 acceptance. A false-safe finding fails here and
+      # blocks merge (MASTER SPEC 71).
+      - run: cargo test --all
+
+  golden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install openpyxl
+      # The golden must be reproducible byte-for-byte from its generator.
+      - run: python scripts/gen_go001.py
+      - run: git diff --exit-code -- golden/

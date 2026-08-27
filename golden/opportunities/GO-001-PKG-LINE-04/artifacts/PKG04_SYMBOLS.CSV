@@ -1,0 +1,25 @@
+ADDRESS,SYMBOL,DESCRIPTION
+I:1/0,INFEED_PE,Infeed photoeye
+I:1/1,ESTOP_OK,E-stop string healthy
+I:1/2,GUARD_DOOR_1,Guard door 1 closed
+I:2/0,CHKWGH_TRIG,Checkweigher trigger
+I:3/0,SAFETY_RESET,Safety reset pushbutton
+O:4/0,INFEED_RUN,Infeed conveyor run
+O:4/1,FILLER_RUN,Filler drive run
+O:5/0,REJECT_SOL,Reject pusher solenoid
+O:9/0,MAIN_AIR_VLV,Main air valve
+I:6.0,FILL_WEIGHT_AI,Fill weight analog in
+I:6.1,LINE_PRESSURE,Line pressure transmitter
+I:6.2,SCALE_RATE,Weigh scale rate
+O:7.0,FILLER_SPEED_AO,Filler speed reference
+O:7.1,CONV_SPEED_AO,Conveyor speed reference
+N7:10,RECIPE_PTR,Active recipe index (indirect)
+N7:20,CASE_COUNT,Cases produced this shift
+B3/0,LINE_RUNNING,Line running latch
+B3/100,MSG_TRIG_0,MSG trigger - VFD01 status read
+T4:0,INFEED_DLY,Infeed start delay
+C5:0,CASE_CTR,Case counter
+PD9:0,FILL_PID,Fill weight PID
+PD9:1,CHKWGH_PID,Checkweigher trim PID
+PD9:2,SCALE_PID,Weigh scale STI PID
+MG10:0,MSG_VFD01,Read VFD-01 status over DeviceNet

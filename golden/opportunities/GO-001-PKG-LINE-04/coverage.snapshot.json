@@ -1,0 +1,16 @@
+{
+  "rule_pack": "RA-2026.08",
+  "_note": "Regenerate with scripts/snapshot_coverage.sh after an intentional change to coverage domains or weights. A diff here is a product change, not a test flake.",
+  "domains": {
+    "PLC_LOGIC": 100,
+    "CONTROLLER_HARDWARE": 100,
+    "IO": 67,
+    "ELECTRICAL": 50,
+    "NETWORK": 33,
+    "HMI": 0,
+    "DRIVES": 0,
+    "SAFETY": 0,
+    "PROCESS_CONTEXT": 100,
+    "SHUTDOWN_REQUIREMENTS": 100
+  }
+}

@@ -1,0 +1,18 @@
+PKG-LINE-04 -- Northstar Foods, Plant 03 Packaging
+Customer notes, transcribed from the walkdown call.
+
+- SLC 5/03 has been in since the line was installed. Two spare 1746-IB16 on the
+  shelf, nothing else.
+- Maximum shutdown we can give you is 12 hours, over a Sunday. Line has to run
+  Monday 6am.
+- We want a fixed price.
+- HMI is a PanelView running something old. Nobody here has the project file.
+  The guy who did it left in 2019.
+- The two VFDs on DeviceNet were replaced at some point, we do not know the
+  parameters. No backups.
+- Electrical drawings are Rev C, printed 2014. There have been changes on the
+  floor since -- at least the reject station was rebuilt.
+- There is a light curtain at the infeed and a safety relay in the panel. Not
+  sure if the PLC is involved in the safety at all.
+- DeviceNet: we know there are drives, starters and the scale on it. No node
+  list, no configuration backup.

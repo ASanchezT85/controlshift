@@ -1,0 +1,6 @@
+[workspace]
+members = ["engines/analysis"]
+resolver = "2"
+
+[profile.release]
+panic = "abort"

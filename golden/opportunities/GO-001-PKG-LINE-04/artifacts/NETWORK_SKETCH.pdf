@@ -1,0 +1,46 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 499 >>
+stream
+BT /F1 11 Tf 50 760 Td 14 TL
+(PKG-LINE-04 NETWORK SKETCH - HAND MARKUP - UNDATED) Tj T*
+() Tj T*
+(SLC 5/03 CH0 -> DH-485 -> PANELVIEW MODEL UNKNOWN) Tj T*
+(1747-SDN SLOT 8 -> DEVICENET TRUNK) Tj T*
+(   - VFD-01     NODE ?) Tj T*
+(   - VFD-02     NODE ?) Tj T*
+(   - STARTER 01 NODE ?) Tj T*
+(   - STARTER 02 NODE ?) Tj T*
+(   - SCALE      NODE ?) Tj T*
+(   - REMOTE I/O NODE ?) Tj T*
+() Tj T*
+(NODE ADDRESSES AND BAUD RATE NOT RECORDED.) Tj T*
+(NO DEVICENET CONFIGURATION BACKUP AVAILABLE.) Tj T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000791 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+861
+%%EOF

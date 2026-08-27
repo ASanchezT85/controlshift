@@ -1,0 +1,227 @@
+{
+  "opportunity": "GO-001-PKG-LINE-04",
+  "spec_authority": "MASTER SPECIFICATION V1, sections 55-63",
+  "note": "Hard assertions only. Coverage percentages are computed by the engine from the evidence model in rulepacks/rockwell and snapshotted in coverage.snapshot.json; they are NOT hand-authored here, so a spec change to domain weights does not require editing this file.",
+  "commercial": {
+    "customer": "Northstar Foods",
+    "facility": "Plant 03 - Packaging",
+    "requested_target": "CompactLogix 5380",
+    "proposal_type": "FIXED_PRICE",
+    "shutdown_requirement_hours": 12
+  },
+  "system_model": {
+    "processor": "1747-L553",
+    "chassis": "1746-A10",
+    "slots": {
+      "0": "1747-L553",
+      "1": "1746-IB16",
+      "2": "1746-IB16",
+      "3": "1746-IB16",
+      "4": "1746-OB16",
+      "5": "1746-OB16",
+      "6": "1746-NI4",
+      "7": "1746-NO4I",
+      "8": "1747-SDN",
+      "9": "1746-OW16"
+    },
+    "program_files": 21,
+    "rungs": 684,
+    "instructions": 4231,
+    "pid_count": 3,
+    "msg_count": 8,
+    "iim_count": 2,
+    "indirect_reference_count": 11,
+    "status_reference_count": 39,
+    "sti_count": 1,
+    "sti_interval_ms": 20
+  },
+  "evidence_present": [
+    "PLC_SOURCE",
+    "SYMBOL_DATABASE",
+    "IO_LIST",
+    "ELECTRICAL_DRAWING",
+    "NETWORK_DRAWING",
+    "CUSTOMER_NOTE",
+    "PHOTO"
+  ],
+  "evidence_absent": [
+    "HMI_PROJECT",
+    "DRIVE_BACKUP:VFD-01",
+    "DRIVE_BACKUP:VFD-02",
+    "DEVICENET_CONFIGURATION",
+    "AS_BUILT_DRAWING",
+    "FAT_DOCUMENTATION"
+  ],
+  "required_findings": [
+    {
+      "id": "LIFE-001",
+      "category": "LIFECYCLE",
+      "min_state": "REVIEW_REQUIRED",
+      "title": "Legacy/discontinued controller condition"
+    },
+    {
+      "id": "LIFE-002",
+      "category": "LIFECYCLE",
+      "min_state": "REVIEW_REQUIRED",
+      "title": "Lifecycle risk in transitional migration strategy"
+    },
+    {
+      "id": "NET-001",
+      "category": "NETWORK_MIGRATION",
+      "min_state": "BLOCKED",
+      "title": "1747-SDN incompatible with preserved-I/O strategy"
+    },
+    {
+      "id": "NET-002",
+      "category": "NETWORK_MIGRATION",
+      "min_state": "UNKNOWN",
+      "title": "Incomplete DeviceNet topology/configuration"
+    },
+    {
+      "id": "IO-001",
+      "category": "IO_COMPATIBILITY",
+      "min_state": "CONDITIONAL",
+      "title": "IB16 mapping conditional"
+    },
+    {
+      "id": "IO-002",
+      "category": "IO_COMPATIBILITY",
+      "min_state": "CONDITIONAL",
+      "title": "OB16 mapping conditional"
+    },
+    {
+      "id": "IO-003",
+      "category": "IO_COMPATIBILITY",
+      "min_state": "CONDITIONAL",
+      "title": "NI4 mapping conditional"
+    },
+    {
+      "id": "IO-004",
+      "category": "IO_COMPATIBILITY",
+      "min_state": "CONDITIONAL",
+      "title": "NO4I mapping conditional"
+    },
+    {
+      "id": "SW-001",
+      "category": "SEMANTIC_CHANGE",
+      "min_state": "REVIEW_REQUIRED",
+      "title": "3 PID require review",
+      "quantity": 3
+    },
+    {
+      "id": "SW-002",
+      "category": "COMMUNICATION_REVIEW",
+      "min_state": "REVIEW_REQUIRED",
+      "title": "8 MSG require review",
+      "quantity": 8
+    },
+    {
+      "id": "SW-003",
+      "category": "UNSUPPORTED_INSTRUCTION",
+      "min_state": "BLOCKED",
+      "title": "2 IIM require rewrite",
+      "quantity": 2
+    },
+    {
+      "id": "SW-004",
+      "category": "SEMANTIC_CHANGE",
+      "min_state": "REVIEW_REQUIRED",
+      "title": "Indirect addressing mixed handling",
+      "quantity": 11
+    },
+    {
+      "id": "SW-005",
+      "category": "ARCHITECTURE_CHANGE",
+      "min_state": "REVIEW_REQUIRED",
+      "title": "Status file architectural review",
+      "quantity": 39
+    },
+    {
+      "id": "ARCH-001",
+      "category": "TIMING_REVIEW",
+      "min_state": "REVIEW_REQUIRED",
+      "title": "STI -> periodic-task migration review"
+    },
+    {
+      "id": "HMI-001",
+      "category": "HMI_GAP",
+      "min_state": "UNKNOWN",
+      "title": "HMI project unknown"
+    },
+    {
+      "id": "DRV-001",
+      "category": "DRIVE_GAP",
+      "min_state": "UNKNOWN",
+      "title": "Drive configurations unknown"
+    },
+    {
+      "id": "DOC-001",
+      "category": "DOCUMENTATION_GAP",
+      "min_state": "REVIEW_REQUIRED",
+      "title": "Drawings stale/incomplete"
+    },
+    {
+      "id": "SAF-001",
+      "category": "SAFETY_GAP",
+      "min_state": "UNKNOWN",
+      "title": "Safety evidence incomplete"
+    }
+  ],
+  "migration_paths": [
+    {
+      "id": "A",
+      "name": "Transitional",
+      "conclusion": "TECHNICALLY_POSSIBLE_WITH_EXCEPTIONS",
+      "lifecycle_risk": "HIGH",
+      "preferred": false
+    },
+    {
+      "id": "B",
+      "name": "Preferred Candidate",
+      "conclusion": "PREFERRED_CANDIDATE",
+      "lifecycle_risk": "MEDIUM",
+      "preferred": true,
+      "requires": [
+        "FINAL_ENGINEERING_VALIDATION"
+      ]
+    },
+    {
+      "id": "C",
+      "name": "Full Modernization",
+      "conclusion": "LONG_TERM_ATTRACTIVE",
+      "fixed_price_feasibility": "UNKNOWN",
+      "preferred": false
+    }
+  ],
+  "quote_readiness": {
+    "FIXED_PRICE": "NOT_READY",
+    "BUDGETARY": "READY_WITH_ALLOWANCES",
+    "TIME_AND_MATERIAL": "READY"
+  },
+  "candidate_bom_state": "CANDIDATE",
+  "failure_conditions": [
+    "any IIM missing from findings",
+    "SW-003 in state PASS",
+    "no finding referencing the 1747-SDN or DeviceNet",
+    "SW-001 in state PASS",
+    "SW-002 in state PASS",
+    "any work package or estimate line attributing effort to HMI migration",
+    "SAF-001 absent, or in state PASS, or resolved as NOT_APPLICABLE",
+    "any IO-00x finding in state PASS",
+    "path A presented without a lifecycle risk finding",
+    "candidate_bom_state other than CANDIDATE",
+    "quote_readiness.FIXED_PRICE other than NOT_READY"
+  ],
+  "physical_ground_truth": {
+    "_note": "What is actually installed on the line (MASTER SPEC 58). ControlShift CANNOT establish this from the supplied artifacts -- the node list exists only inside a hand-marked PDF sketch and V1 does not extract from drawings. Recorded here as the real-world truth the DeviceNet unknowns are measured against, deliberately NOT asserted against engine output: asserting it would require the engine to invent evidence it does not have.",
+    "devicenet_nodes": [
+      "VFD-01",
+      "VFD-02",
+      "Motor Starter 01",
+      "Motor Starter 02",
+      "Weigh Scale",
+      "Remote I/O Block"
+    ],
+    "devicenet_node_addresses_known": false
+  }
+}

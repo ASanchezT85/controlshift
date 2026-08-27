@@ -1,0 +1,339 @@
+{
+  "id": "RA-2026.08",
+  "vendor": "Rockwell Automation",
+  "source_platform": "SLC500",
+  "target_platform": "CompactLogix 5380 / Compact 5000 I/O",
+
+  "coverage_domains": [
+    { "id": "PLC_LOGIC", "weight": 1.0, "requires": ["PLC_SOURCE", "PROGRAM_PARSED", "SYMBOL_DATABASE"] },
+    { "id": "CONTROLLER_HARDWARE", "weight": 1.0, "requires": ["CONTROLLER_IDENTIFIED", "IO_MODULES_IDENTIFIED"] },
+    { "id": "IO", "weight": 1.0, "requires": ["IO_LIST", "IO_MODULES_IDENTIFIED", "FIELD_DEVICE_LIST"] },
+    { "id": "ELECTRICAL", "weight": 0.8, "requires": ["ELECTRICAL_DRAWING", "AS_BUILT_DRAWING"] },
+    { "id": "NETWORK", "weight": 1.0, "requires": ["NETWORK_DRAWING", "DEVICENET_NODE_ADDRESSES", "DEVICENET_CONFIGURATION"] },
+    { "id": "HMI", "weight": 0.8, "requires": ["HMI_PROJECT", "HMI_MODEL_IDENTIFIED"] },
+    { "id": "DRIVES", "weight": 0.8, "requires": ["DRIVE_BACKUP", "DRIVE_MODEL_IDENTIFIED"] },
+    { "id": "SAFETY", "weight": 1.0, "requires": ["SAFETY_ARCHITECTURE", "SAFETY_DEVICE_LIST"] },
+    { "id": "PROCESS_CONTEXT", "weight": 0.5, "requires": ["CUSTOMER_NOTE", "PHOTO"] },
+    { "id": "SHUTDOWN_REQUIREMENTS", "weight": 0.8, "requires": ["SHUTDOWN_REQUIREMENT"] }
+  ],
+
+  "discontinued_processors": ["1747-L511", "1747-L514", "1747-L524", "1747-L531", "1747-L532", "1747-L541", "1747-L542", "1747-L543", "1747-L551", "1747-L552", "1747-L553"],
+
+  "io_mapping": [
+    { "from": "1746-IB16", "to": "5069-IB16", "wiring": "1492-AIFM16-F-5", "state": "CONDITIONAL", "finding": "IO-001" },
+    { "from": "1746-OB16", "to": "5069-OB16", "wiring": "1492-AIFM16-F-5", "state": "CONDITIONAL", "finding": "IO-002" },
+    { "from": "1746-NI4", "to": "5069-IF8", "wiring": "field terminations reworked", "state": "CONDITIONAL", "finding": "IO-003" },
+    { "from": "1746-NO4I", "to": "5069-OF4CIH", "wiring": "field terminations reworked", "state": "CONDITIONAL", "finding": "IO-004" },
+    { "from": "1746-OW16", "to": "5069-OW16", "wiring": "1492-AIFM16-F-5", "state": "CONDITIONAL", "finding": "IO-005" },
+    { "from": "1747-L553", "to": "5069-L340ERM", "wiring": "n/a", "state": "CONDITIONAL", "finding": "LIFE-001" },
+    { "from": "1747-SDN", "to": "NO_DIRECT_EQUIVALENT", "wiring": "n/a", "state": "BLOCKED", "finding": "NET-001" }
+  ],
+
+  "rules": [
+    {
+      "id": "LIFE-001",
+      "predicate": "processor_discontinued",
+      "category": "LIFECYCLE",
+      "state": "REVIEW_REQUIRED",
+      "severity": "HIGH",
+      "certainty": "OEM_CLAIM",
+      "title": "Legacy/discontinued controller condition",
+      "description": "The installed processor is in a discontinued or end-of-life lifecycle state. Replacement, spares and support availability must be confirmed against current OEM lifecycle data before commitment.",
+      "work_packages": ["CONTROLS_DESIGN", "PLC_PROGRAM_REVIEW"],
+      "evidence": [{ "source_type": "OEM", "publication_id": "1747-QS001" }]
+    },
+    {
+      "id": "LIFE-002",
+      "predicate": "always",
+      "category": "LIFECYCLE",
+      "state": "REVIEW_REQUIRED",
+      "severity": "HIGH",
+      "certainty": "OEM_CLAIM",
+      "title": "Lifecycle risk in transitional migration strategy",
+      "description": "A transitional strategy that retains 1746 I/O keeps discontinued hardware in the final architecture. Lifecycle exposure does not end at cutover and must be disclosed before a strategy is chosen.",
+      "work_packages": ["CONTROLS_DESIGN"],
+      "evidence": [{ "source_type": "OEM", "publication_id": "5069-AP001" }],
+      "affects_paths": ["A"]
+    },
+    {
+      "id": "NET-001",
+      "predicate": "module_present",
+      "args": { "catalog": "1747-SDN" },
+      "category": "NETWORK_MIGRATION",
+      "state": "BLOCKED",
+      "severity": "HIGH",
+      "certainty": "OEM_CLAIM",
+      "title": "1747-SDN incompatible with preserved-I/O strategy",
+      "description": "The 1747-SDN DeviceNet scanner has no supported operation behind a preserved-1746-I/O adapter strategy and no direct Compact 5000 equivalent. DeviceNet connectivity must be redesigned, not carried over.",
+      "work_packages": ["DEVICENET_MIGRATION", "NET_DEVICE_MIGRATION", "PLC_COMMUNICATION_REVIEW", "COMMUNICATION_FAT"],
+      "evidence": [{ "source_type": "OEM", "publication_id": "5069-AP001" }],
+      "blocks_paths": ["A"]
+    },
+    {
+      "id": "NET-002",
+      "predicate": "evidence_absent",
+      "args": { "key": "DEVICENET_CONFIGURATION" },
+      "category": "NETWORK_MIGRATION",
+      "state": "UNKNOWN",
+      "severity": "HIGH",
+      "certainty": "UNKNOWN",
+      "title": "Incomplete DeviceNet topology/configuration",
+      "description": "No DeviceNet configuration backup and no node address list were supplied. Node count, addressing, baud rate, connection sizes and I/O assemblies cannot be established from the available evidence.",
+      "work_packages": ["DEVICENET_MIGRATION", "DISCOVERY"],
+      "evidence": [{ "source_type": "ABSENT", "locator": "no DeviceNet configuration artifact in manifest" }],
+      "unknown": {
+        "missing_information": "DeviceNet node addresses, baud rate and per-node configuration",
+        "affected_domains": ["NETWORK", "DRIVES", "IO"],
+        "commercial_impact": "Node-level migration effort cannot be quantified",
+        "technical_impact": "Replacement network design and I/O assembly mapping cannot be completed",
+        "recommended_resolution": "Obtain a DeviceNet configuration backup (RSNetWorx) or perform an onsite network survey",
+        "estimate_allowance_profile": "RESOLVE_BEFORE_QUOTE"
+      }
+    },
+    {
+      "id": "IO-001",
+      "predicate": "module_present",
+      "args": { "catalog": "1746-IB16" },
+      "category": "IO_COMPATIBILITY",
+      "state": "CONDITIONAL",
+      "severity": "MEDIUM",
+      "certainty": "OEM_CLAIM",
+      "title": "IB16 mapping conditional",
+      "description": "A Compact 5000 equivalent exists on paper. OEM mapping is a catalog correspondence, not a guarantee of field compatibility: input device type, leakage current, sinking/sourcing arrangement and existing field wiring must be verified.",
+      "work_packages": ["IO_MIGRATION_DESIGN", "PANEL_RETROFIT", "IO_CHECKOUT"],
+      "evidence": [{ "source_type": "OEM", "publication_id": "5069-AP001" }]
+    },
+    {
+      "id": "IO-002",
+      "predicate": "module_present",
+      "args": { "catalog": "1746-OB16" },
+      "category": "IO_COMPATIBILITY",
+      "state": "CONDITIONAL",
+      "severity": "MEDIUM",
+      "certainty": "OEM_CLAIM",
+      "title": "OB16 mapping conditional",
+      "description": "Output mapping is conditional on load type, inrush, per-point and per-module current limits, and on the existing field wiring arrangement.",
+      "work_packages": ["IO_MIGRATION_DESIGN", "PANEL_RETROFIT", "IO_CHECKOUT"],
+      "evidence": [{ "source_type": "OEM", "publication_id": "5069-AP001" }]
+    },
+    {
+      "id": "IO-003",
+      "predicate": "module_present",
+      "args": { "catalog": "1746-NI4" },
+      "category": "IO_COMPATIBILITY",
+      "state": "CONDITIONAL",
+      "severity": "MEDIUM",
+      "certainty": "OEM_CLAIM",
+      "title": "NI4 mapping conditional",
+      "description": "Analog input replacement changes raw data scaling and resolution. Every scaling calculation in the program that consumes these channels must be revisited; the replacement module is not a drop-in numerically.",
+      "work_packages": ["IO_MIGRATION_DESIGN", "PLC_PROGRAM_REVIEW", "IO_CHECKOUT"],
+      "evidence": [{ "source_type": "OEM", "publication_id": "5069-AP001" }]
+    },
+    {
+      "id": "IO-004",
+      "predicate": "module_present",
+      "args": { "catalog": "1746-NO4I" },
+      "category": "IO_COMPATIBILITY",
+      "state": "CONDITIONAL",
+      "severity": "MEDIUM",
+      "certainty": "OEM_CLAIM",
+      "title": "NO4I mapping conditional",
+      "description": "Isolated analog output replacement changes scaling, resolution and isolation topology. Output scaling logic and field isolation requirements must be verified.",
+      "work_packages": ["IO_MIGRATION_DESIGN", "PLC_PROGRAM_REVIEW", "IO_CHECKOUT"],
+      "evidence": [{ "source_type": "OEM", "publication_id": "5069-AP001" }]
+    },
+    {
+      "id": "IO-005",
+      "predicate": "module_present",
+      "args": { "catalog": "1746-OW16" },
+      "category": "IO_COMPATIBILITY",
+      "state": "CONDITIONAL",
+      "severity": "MEDIUM",
+      "certainty": "OEM_CLAIM",
+      "title": "OW16 relay mapping conditional",
+      "description": "Relay output replacement is conditional on contact rating, load type and expected switching duty.",
+      "work_packages": ["IO_MIGRATION_DESIGN", "PANEL_RETROFIT", "IO_CHECKOUT"],
+      "evidence": [{ "source_type": "OEM", "publication_id": "5069-AP001" }]
+    },
+    {
+      "id": "SW-001",
+      "predicate": "opcode_count",
+      "args": { "opcode": "PID" },
+      "category": "SEMANTIC_CHANGE",
+      "state": "REVIEW_REQUIRED",
+      "severity": "HIGH",
+      "certainty": "FACT",
+      "title": "PID instances require review",
+      "description": "SLC PID and Logix PIDE differ in gain form, tuning-constant units, scaling and update-time handling. Each loop requires review and re-tuning validation; tuning constants do not transfer numerically.",
+      "work_packages": ["PID_VALIDATION", "PLC_PROGRAM_REVIEW", "FAT"],
+      "unit_type": "LOOP",
+      "evidence": [{ "source_type": "STRUCTURED_PARSE" }, { "source_type": "OEM", "publication_id": "1756-RM006" }]
+    },
+    {
+      "id": "SW-002",
+      "predicate": "opcode_count",
+      "args": { "opcode": "MSG" },
+      "category": "COMMUNICATION_REVIEW",
+      "state": "REVIEW_REQUIRED",
+      "severity": "HIGH",
+      "certainty": "FACT",
+      "title": "MSG instances require review",
+      "description": "Every MSG instruction must be re-targeted: message type, path, target data table address and connection handling all change. Message targets cannot be confirmed while the network configuration is unknown.",
+      "work_packages": ["MSG_RECONFIGURATION", "PLC_COMMUNICATION_REVIEW", "COMMUNICATION_FAT"],
+      "unit_type": "MESSAGE",
+      "evidence": [{ "source_type": "STRUCTURED_PARSE" }]
+    },
+    {
+      "id": "SW-003",
+      "predicate": "opcode_count",
+      "args": { "opcode": "IIM" },
+      "category": "UNSUPPORTED_INSTRUCTION",
+      "state": "BLOCKED",
+      "severity": "HIGH",
+      "certainty": "OEM_CLAIM",
+      "title": "IIM instances require manual rewrite",
+      "description": "Immediate I/O instructions have no equivalent in the target platform's I/O model. Each occurrence requires a manual redesign of the scan-synchronous behaviour it was written to obtain.",
+      "work_packages": ["UNSUPPORTED_INSTRUCTION_REWRITE", "PLC_PROGRAM_REVIEW", "FAT"],
+      "unit_type": "INSTRUCTION",
+      "evidence": [{ "source_type": "STRUCTURED_PARSE" }, { "source_type": "OEM", "publication_id": "1756-RM085" }]
+    },
+    {
+      "id": "SW-004",
+      "predicate": "operand_class_count",
+      "args": { "class": "INDIRECT" },
+      "category": "SEMANTIC_CHANGE",
+      "state": "REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "certainty": "FACT",
+      "title": "Indirect addressing mixed handling",
+      "description": "Indirect data-file references depend on the SLC flat data model. Under a tag-based target each occurrence resolves differently - some become array indexing, some require restructuring. Handling is mixed and must be decided per occurrence.",
+      "work_packages": ["PLC_PROGRAM_REVIEW", "UNSUPPORTED_INSTRUCTION_REWRITE"],
+      "unit_type": "REFERENCE",
+      "evidence": [{ "source_type": "STRUCTURED_PARSE" }]
+    },
+    {
+      "id": "SW-005",
+      "predicate": "operand_class_count",
+      "args": { "class": "STATUS" },
+      "category": "ARCHITECTURE_CHANGE",
+      "state": "REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "certainty": "FACT",
+      "title": "Status file architectural review",
+      "description": "S: file references depend on SLC processor internals with no one-to-one target equivalent. Each reference requires an architectural decision, not a translation.",
+      "work_packages": ["PLC_PROGRAM_REVIEW"],
+      "unit_type": "REFERENCE",
+      "evidence": [{ "source_type": "STRUCTURED_PARSE" }]
+    },
+    {
+      "id": "ARCH-001",
+      "predicate": "sti_present",
+      "category": "TIMING_REVIEW",
+      "state": "REVIEW_REQUIRED",
+      "severity": "HIGH",
+      "certainty": "FACT",
+      "title": "STI to periodic-task migration review",
+      "description": "The selectable timed interrupt becomes a periodic task. Execution timing, task priority, overlap handling and interaction with the continuous task change and require timing validation on the target.",
+      "work_packages": ["PLC_PROGRAM_REVIEW", "FAT"],
+      "evidence": [{ "source_type": "STRUCTURED_PARSE" }]
+    },
+    {
+      "id": "HMI-001",
+      "predicate": "evidence_absent",
+      "args": { "key": "HMI_PROJECT" },
+      "category": "HMI_GAP",
+      "state": "UNKNOWN",
+      "severity": "HIGH",
+      "certainty": "UNKNOWN",
+      "title": "HMI project unknown",
+      "description": "No HMI project file was supplied. Screen count, tag references, alarm configuration, communication configuration and scripting cannot be established. No HMI migration effort may be estimated from the available evidence.",
+      "work_packages": ["DISCOVERY"],
+      "evidence": [{ "source_type": "ABSENT", "locator": "no HMI_PROJECT artifact in manifest" }],
+      "unknown": {
+        "missing_information": "HMI application: screens, tags, alarms, communications, scripts",
+        "affected_domains": ["HMI", "NETWORK"],
+        "commercial_impact": "HMI scope cannot be priced; exclude or carry an allowance",
+        "technical_impact": "PLC tag interface to the HMI cannot be reconstructed",
+        "recommended_resolution": "Obtain the HMI project file or upload from the terminal",
+        "estimate_allowance_profile": "EXCLUDE_OR_ALLOWANCE"
+      }
+    },
+    {
+      "id": "DRV-001",
+      "predicate": "evidence_absent",
+      "args": { "key": "DRIVE_BACKUP" },
+      "category": "DRIVE_GAP",
+      "state": "UNKNOWN",
+      "severity": "HIGH",
+      "certainty": "UNKNOWN",
+      "title": "Drive configurations unknown",
+      "description": "No drive parameter backups were supplied. Drive family, firmware, network configuration and parameter set cannot be established, and drive-related migration effort cannot be quantified.",
+      "work_packages": ["DISCOVERY"],
+      "evidence": [{ "source_type": "ABSENT", "locator": "no DRIVE_BACKUP artifact in manifest" }],
+      "unknown": {
+        "missing_information": "VFD parameter backups and drive network configuration",
+        "affected_domains": ["DRIVES", "NETWORK"],
+        "commercial_impact": "Drive migration effort cannot be quantified; exclude or carry an allowance",
+        "technical_impact": "Drive control interface and parameter reconstruction not possible",
+        "recommended_resolution": "Obtain drive backups or perform an onsite parameter upload",
+        "estimate_allowance_profile": "EXCLUDE_OR_ALLOWANCE"
+      }
+    },
+    {
+      "id": "DOC-001",
+      "predicate": "evidence_absent",
+      "args": { "key": "AS_BUILT_DRAWING" },
+      "category": "DOCUMENTATION_GAP",
+      "state": "REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "certainty": "INFERENCE",
+      "title": "Drawings stale/incomplete",
+      "description": "The supplied electrical drawings are not as-built. Field changes since the drawing revision are not documented, so panel and field-wiring scope derived from them carries error.",
+      "work_packages": ["DISCOVERY", "DOCUMENTATION_UPDATE", "PANEL_RETROFIT"],
+      "evidence": [{ "source_type": "ABSENT", "locator": "no AS_BUILT_DRAWING artifact in manifest" }],
+      "unknown": {
+        "missing_information": "As-built electrical documentation reflecting field changes",
+        "affected_domains": ["ELECTRICAL", "IO"],
+        "commercial_impact": "Panel and field wiring scope carries unquantified error",
+        "technical_impact": "I/O to field device correspondence cannot be fully trusted",
+        "recommended_resolution": "Site walkdown and drawing verification",
+        "estimate_allowance_profile": "ALLOWANCE"
+      }
+    },
+    {
+      "id": "SAF-001",
+      "predicate": "evidence_absent",
+      "args": { "key": "SAFETY_ARCHITECTURE" },
+      "category": "SAFETY_GAP",
+      "state": "UNKNOWN",
+      "severity": "HIGH",
+      "certainty": "UNKNOWN",
+      "title": "Safety evidence incomplete",
+      "description": "The supplied evidence does not establish the machine safety architecture. The absence of a safety controller in the supplied files does NOT establish that safety is outside the scope of this migration - only that it is insufficiently evidenced.",
+      "work_packages": ["DISCOVERY"],
+      "evidence": [{ "source_type": "ABSENT", "locator": "no safety architecture documentation in manifest" }],
+      "unknown": {
+        "missing_information": "Safety architecture: devices, circuits, performance level, PLC involvement",
+        "affected_domains": ["SAFETY", "ELECTRICAL", "IO"],
+        "commercial_impact": "Safety scope cannot be included or excluded responsibly without review",
+        "technical_impact": "Interaction between the migrated controller and the safety system is unknown",
+        "recommended_resolution": "Safety walkdown and review of the existing safety circuit documentation",
+        "estimate_allowance_profile": "RESOLVE_BEFORE_QUOTE"
+      }
+    }
+  ],
+
+  "quote_readiness_policy": {
+    "fixed_price": {
+      "max_critical_unknowns": 0,
+      "max_unresolved_blockers": 0,
+      "min_weighted_coverage_percent": 85,
+      "requires_engineering_review_complete": true,
+      "requires_shutdown_feasible": true
+    },
+    "budgetary": {
+      "max_unresolved_blockers": 99,
+      "min_weighted_coverage_percent": 50
+    }
+  }
+}
