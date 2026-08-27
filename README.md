@@ -64,6 +64,24 @@ that path and no default ControlShift claims as universal.
   `work package ← finding ← rule ← evidence`, and each document is written once
   to `storage/reports/` with its SHA-256; regenerating creates a new row.
 
+## What the console can drive
+
+The whole workflow, without curl: create an opportunity, upload artifacts, run
+the analysis, review each finding, record the two human determinations,
+propose and approve assumptions and exclusions, read the estimate, and generate
+the three deliverables. Effort templates are editable under `/admin` by an
+estimator or admin.
+
+Two things the console deliberately makes visible rather than smoothing over:
+
+- **Confirming the human determinations does not buy readiness.** On GO-001 it
+  removes two of the five refusal reasons; the blockers, the critical unknowns
+  and the 54% coverage remain, and fixed price stays NOT READY.
+- **A verdict computed before the latest change is marked stale.** The stored
+  analysis is never rewritten (SPEC 24), so the console compares the
+  determinations recorded on the analysis against the ones in force now and
+  asks for a re-analysis instead of silently showing an old answer.
+
 ## Application-layer boundaries
 
 - **Tenancy and RBAC are tested, not asserted.** `services/api/src/tenancy.test.ts`

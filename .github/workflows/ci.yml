@@ -73,4 +73,5 @@ jobs:
         with:
           node-version: 22
       - run: npm ci --prefix apps/web
+      - run: npx --prefix apps/web tsc --noEmit -p apps/web/tsconfig.json
       - run: npm run build --prefix apps/web

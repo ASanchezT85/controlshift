@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { api, login, sessionUser, signOut, type SessionUser } from '@/lib/api';
+import NewOpportunity from './NewOpportunity';
 
 interface OpportunityRow {
   id: string;
@@ -78,6 +79,7 @@ export default function Home() {
             <span className="muted">
               {user.name} · {user.role.replace(/_/g, ' ').toLowerCase()}{' '}
             </span>
+            <Link href="/admin">Administration</Link>{' '}
             <button
               className="ghost"
               onClick={() => {
@@ -90,6 +92,10 @@ export default function Home() {
             </button>
           </span>
         </h2>
+        <NewOpportunity
+          role={user.role}
+          onCreated={async () => setRows(await api<OpportunityRow[]>('/opportunities'))}
+        />
         {error && <p className="error">{error}</p>}
         {!rows && !error && <p className="muted">Loading…</p>}
         {rows && rows.length === 0 && <p className="muted">No opportunities yet.</p>}

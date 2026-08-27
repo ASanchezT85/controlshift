@@ -140,6 +140,8 @@ export class AnalysesService {
           analysisEngineVersion: result.versions.analysis_engine_version,
           rulePackVersion: result.versions.rule_pack_version,
           targetStrategy,
+          engineeringReviewComplete: opportunity.engineeringReviewComplete,
+          shutdownFeasible: opportunity.shutdownFeasible,
           finishedAt: new Date(),
           result,
         },

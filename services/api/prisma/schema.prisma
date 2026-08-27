@@ -192,6 +192,12 @@ model Analysis {
 
   targetStrategy String
 
+  // The human determinations this assessment was computed with. Recorded so a
+  // verdict can be compared against the opportunity as it stands now, and so
+  // the run stays reproducible (SPEC 70).
+  engineeringReviewComplete Boolean @default(false)
+  shutdownFeasible          Boolean @default(false)
+
   startedAt  DateTime  @default(now())
   finishedAt DateTime?
   failed     Boolean   @default(false)

@@ -5,6 +5,8 @@ import { use, useCallback, useEffect, useState } from 'react';
 import { api, sessionUser, token } from '@/lib/api';
 import ArtifactsCard from './ArtifactsCard';
 import CommercialCard, { type Assumption, type Exclusion } from './CommercialCard';
+import FindingsCard, { type Finding, type Review } from './FindingsCard';
+import GateCard from './GateCard';
 
 const API = process.env.NEXT_PUBLIC_API ?? 'http://127.0.0.1:3000/api';
 
@@ -42,18 +44,6 @@ const REPORT_KINDS = [
   ['PROPOSAL_INPUT_PACKAGE', 'Proposal Input Package'],
   ['CUSTOMER_INFORMATION_REQUEST', 'Customer Information Request'],
 ] as const;
-
-interface Finding {
-  id: string;
-  category: string;
-  title: string;
-  description: string;
-  state: string;
-  severity: string;
-  quantity?: number;
-  work_packages: string[];
-  evidence: { source_type: string; publication_id?: string; locator?: string }[];
-}
 
 interface AnalysisResult {
   versions: Record<string, string>;
@@ -98,10 +88,14 @@ interface Analysis {
   rulePackVersion: string;
   analysisEngineVersion: string;
   result: AnalysisResult;
+  reviews: Review[];
+  engineeringReviewComplete: boolean;
+  shutdownFeasible: boolean;
 }
 
 interface Opportunity {
   id: string;
+  updatedAt: string;
   name: string;
   customerName: string;
   facilityName: string;
@@ -224,6 +218,13 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
   if (!opportunity) return <p className="muted">Loading…</p>;
 
   const r = analysis?.result;
+  // A stored analysis is never rewritten (SPEC 24). Compare the determinations
+  // it was computed with against the ones in force now - timestamps cannot be
+  // used, because running the analysis itself touches the opportunity.
+  const stale =
+    !!analysis &&
+    (analysis.engineeringReviewComplete !== opportunity.engineeringReviewComplete ||
+      analysis.shutdownFeasible !== opportunity.shutdownFeasible);
 
   return (
     <>
@@ -259,6 +260,13 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
 
       {r && (
         <>
+          {stale && (
+            <p className="notice">
+              This verdict was computed before the latest change to the opportunity. Re-analyze to
+              refresh it — the stored assessment is never rewritten in place.
+            </p>
+          )}
+
           <div className="card">
             <h2>Quote readiness</h2>
             <div className="verdict">
@@ -289,6 +297,16 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
               </ul>
             )}
           </div>
+
+          <GateCard
+            opportunityId={id}
+            engineeringReviewComplete={opportunity.engineeringReviewComplete}
+            shutdownFeasible={opportunity.shutdownFeasible}
+            shutdownHours={opportunity.shutdownRequirementHours}
+            role={sessionUser()?.role ?? 'VIEWER'}
+            reasons={r.quote_readiness.reasons}
+            onChange={load}
+          />
 
           <div className="card">
             <h2>Reconstructed system</h2>
@@ -350,44 +368,14 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
 
-          <div className="card">
-            <h2>Findings ({r.findings.length})</h2>
-            <div className="scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>State</th>
-                    <th>Finding</th>
-                    <th>Qty</th>
-                    <th>Evidence</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {r.findings.map((f) => (
-                    <tr key={f.id}>
-                      <td>{f.id}</td>
-                      <td>
-                        <span className={`state ${f.state}`}>{f.state.replace(/_/g, ' ')}</span>
-                      </td>
-                      <td>
-                        <strong>{f.title}</strong>
-                        <div className="muted" style={{ fontSize: 13 }}>
-                          {f.description}
-                        </div>
-                      </td>
-                      <td>{f.quantity ?? '—'}</td>
-                      <td className="muted" style={{ fontSize: 13 }}>
-                        {f.evidence
-                          .map((e) => e.publication_id ?? e.locator ?? e.source_type)
-                          .join('; ')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <FindingsCard
+            opportunityId={id}
+            analysisId={analysis!.id}
+            findings={r.findings}
+            reviews={analysis!.reviews ?? []}
+            role={sessionUser()?.role ?? 'VIEWER'}
+            onChange={load}
+          />
 
           <div className="card">
             <h2>Unknowns ({r.unknowns.length})</h2>
