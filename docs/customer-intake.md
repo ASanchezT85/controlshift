@@ -83,6 +83,25 @@ grammar mismatch is a product question, not a parser bug to route around.
 The grammar in `docs/slc-ascii-format.md` §2 stays unvalidated until a real
 export runs through `scripts/conform.py`. Ranked ways to get one:
 
+### 0. The six clicks, whichever tool you use
+
+Someone with RSLogix in front of them does this in two minutes:
+
+1. Open the project.
+2. `File > Save As`
+3. Tick **Export Database**, then tick **A.B. 6200**
+4. File type: **.SLC**
+5. Tick **Complete Program Save**, enable **all Export Options**
+6. Save, then run:
+
+```bash
+python scripts/validate_export.py THAT_FILE.SLC
+```
+
+That one command answers all three open questions at once: whether the grammar
+reads it, whether the engine reconstructs a system, and whether the rack is in
+the export or only in the report.
+
 ### 1. Free tool + public sample projects (no cost, no customer)
 
 `github.com/anilharish/PLC_Programming` holds nine real `.RSS` projects
@@ -91,8 +110,9 @@ are OLE2 compound documents whose metadata names **RSLogix Micro Starter Lite**
 as the authoring tool — so the free tool opens them.
 
 - Get RSLogix Micro Starter Lite 8.30 from Rockwell's Product Compatibility and
-  Download Center. It is in the retired-products category now: a free Rockwell
-  account plus an unlock request.
+  Download Center. **A human has to do this part**: the download sits behind a
+  Rockwell account, the product is in the retired category and needs an unlock
+  request, and the installer and the export dialog are both Windows GUIs.
 - Open a sample `.RSS`, then `File > Save As > Export Database > A.B. 6200 >
   .SLC` with *Complete Program Save*.
 - Run `python scripts/conform.py` on the result.
