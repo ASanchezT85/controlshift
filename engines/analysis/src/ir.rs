@@ -4,7 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
-pub const IR_SCHEMA_VERSION: &str = "1.0.0";
+pub const IR_SCHEMA_VERSION: &str = "1.1.0";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SourceSpan {
@@ -117,6 +117,11 @@ pub struct Rung {
     pub index: usize,
     pub instructions: Vec<Instruction>,
     pub has_branch: bool,
+    /// The rung exactly as it appears in the artifact. Kept because branch
+    /// tokens are structural and are not stored as instructions: a rung
+    /// rebuilt from the instruction list alone would render a parallel branch
+    /// as a series of contacts, which is different logic.
+    pub source_text: String,
     pub source_span: SourceSpan,
 }
 

@@ -307,3 +307,10 @@ select {
 .arrow {
   fill: var(--muted);
 }
+
+code.rung {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12.5px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

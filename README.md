@@ -93,6 +93,28 @@ Two things the console deliberately makes visible rather than smoothing over:
   determinations recorded on the analysis against the ones in force now and
   asks for a re-analysis instead of silently showing an old answer.
 
+## System Explorer
+
+Browse the reconstructed program: 21 files with their rung and instruction
+counts, the findings resting on each, and the STI marked where it lives. Open
+one and filter its rungs — `IIM` on LAD8 lands on the single rung that blocks
+the migration, at its line in the artifact:
+
+```
+rung 9   line 254   SOR IIM I:2.0 1 EOR
+                    IIM - no equivalent in the target I/O model    SW-003
+```
+
+**Rungs are shown as written, not rebuilt.** Branch tokens are structural and
+are not stored as instructions, so a rung reassembled from the instruction list
+alone would render `BST XIC A NXB XIC B BND` as three contacts in series —
+different logic, shown confidently. The IR now keeps each rung's source line
+(IR schema 1.1.0) and the explorer prints that.
+
+An assessment produced before 1.1.0 has no source line. Stored analyses are
+never rewritten, so the explorer falls back to the rebuilt form and says so in
+as many words rather than crashing or pretending.
+
 ## Scope Builder
 
 Scope is organised into the eleven sections of SPEC 28, and every line answers

@@ -10,6 +10,7 @@ import CustomerLogo from './CustomerLogo';
 import DependencyCard from './DependencyCard';
 import GateCard from './GateCard';
 import ScopeCard from './ScopeCard';
+import SystemExplorer, { type Program } from './SystemExplorer';
 
 const API = process.env.NEXT_PUBLIC_API ?? 'http://127.0.0.1:3000/api';
 
@@ -54,8 +55,8 @@ interface AnalysisResult {
     processor: string;
     chassis: string;
     modules: { slot: number; catalog: string }[];
-    programs: { number: number; name: string; rungs: unknown[] }[];
-    sti?: { interval_ms: number } | null;
+    programs: Program[];
+    sti?: { program_file: number; interval_ms: number } | null;
   };
   evidence_coverage: { domain: string; percent: number; missing: string[] }[];
   dependencies: { from: string; relation: string; to: string }[];
@@ -361,6 +362,12 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
               CANDIDATE — NOT RELEASED FOR PROCUREMENT
             </p>
           </div>
+
+          <SystemExplorer
+            programs={r.system_model.programs}
+            findings={r.findings}
+            sti={r.system_model.sti}
+          />
 
           <div className="card">
             <h2>Evidence coverage</h2>

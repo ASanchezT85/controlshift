@@ -170,6 +170,13 @@ def main():
           "program reconstructed", f"21 files, {rungs} rungs, {instructions} instructions")
     check(len(result["diagnostics"]) == 0, "no parser diagnostics")
 
+    branched = [g for p in system["programs"] for g in p["rungs"] if g["has_branch"]]
+    check(bool(branched), "branched rungs reconstructed", f"{len(branched)} found")
+    check(all("BST" in g["source_text"] for g in branched),
+          "a parallel branch is kept as written, not flattened to a series")
+    check(all(g.get("source_text") for p in system["programs"] for g in p["rungs"]),
+          "every rung carries its source line for the explorer")
+
     ids = {f["id"]: f for f in result["findings"]}
     for required in ["LIFE-001", "LIFE-002", "NET-001", "NET-002", "IO-001", "IO-002",
                      "IO-003", "IO-004", "SW-001", "SW-002", "SW-003", "SW-004", "SW-005",

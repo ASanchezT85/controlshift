@@ -206,7 +206,7 @@ pub fn parse(artifact: &str, src: &str) -> ParseOutput {
                 }
                 let prog = current.as_mut().expect("just created");
                 let index = prog.rungs.len();
-                let (rung, mut d) = parse_rung(&ctx.artifact, &l, index);
+                let (rung, mut d) = parse_rung(&ctx.artifact, &l, index, l.raw.trim());
                 ctx.diags.append(&mut d);
                 prog.rungs.push(rung);
             }
@@ -240,7 +240,12 @@ pub fn parse(artifact: &str, src: &str) -> ParseOutput {
 /// Mnemonics are ALL-CAPS alphabetic tokens; anything else is an operand of the
 /// mnemonic that precedes it. That is the whole disambiguation rule and it is
 /// why operands like `T4:0/DN` (not purely alphabetic) never look like opcodes.
-fn parse_rung(artifact: &str, l: &Line, index: usize) -> (Rung, Vec<Diagnostic>) {
+fn parse_rung(
+    artifact: &str,
+    l: &Line,
+    index: usize,
+    source_text: &str,
+) -> (Rung, Vec<Diagnostic>) {
     let mut diags = Vec::new();
     let span = SourceSpan {
         artifact: artifact.to_string(),
@@ -308,6 +313,7 @@ fn parse_rung(artifact: &str, l: &Line, index: usize) -> (Rung, Vec<Diagnostic>)
             index,
             instructions,
             has_branch,
+            source_text: source_text.to_string(),
             source_span: span,
         },
         diags,

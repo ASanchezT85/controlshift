@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 
 export interface WorkPackage {
   code: string;
@@ -68,8 +68,10 @@ export default function ScopeCard({
         <table>
           <tbody>
             {grouped.map(({ section, items }) => (
-              <>
-                <tr key={section}>
+              // The key belongs on the fragment: React cannot tell the rows of
+              // one section from another's without it, and may drop rows.
+              <Fragment key={section}>
+                <tr>
                   <td colSpan={4} style={{ paddingTop: 14 }}>
                     <strong>{section}</strong>{' '}
                     {items.length === 0 && (
@@ -118,7 +120,7 @@ export default function ScopeCard({
                     </tr>
                   );
                 })}
-              </>
+              </Fragment>
             ))}
             {unassigned.length > 0 && (
               <tr>

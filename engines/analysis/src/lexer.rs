@@ -12,6 +12,8 @@ pub struct Token {
 pub struct Line {
     pub number: usize,
     pub tokens: Vec<Token>,
+    /// The line exactly as read, before comments and quoting were handled.
+    pub raw: String,
 }
 
 /// Split a line into whitespace-separated tokens, keeping `"quoted strings"`
@@ -52,7 +54,11 @@ pub fn tokenize_line(number: usize, src: &str) -> Line {
             column: start + 1,
         });
     }
-    Line { number, tokens }
+    Line {
+        number,
+        tokens,
+        raw: src.to_string(),
+    }
 }
 
 pub fn tokenize(src: &str) -> Vec<Line> {
