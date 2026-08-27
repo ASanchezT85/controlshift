@@ -72,12 +72,7 @@ fn text(ctx: &mut Ctx, l: &Line, idx: usize, what: &str) -> Option<String> {
     match l.tokens.get(idx) {
         Some(t) => Some(t.text.clone()),
         None => {
-            ctx.err(
-                "E_MISSING_OPERAND",
-                format!("missing {what}"),
-                l.number,
-                1,
-            );
+            ctx.err("E_MISSING_OPERAND", format!("missing {what}"), l.number, 1);
             None
         }
     }
@@ -301,7 +296,8 @@ fn parse_rung(artifact: &str, l: &Line, index: usize) -> (Rung, Vec<Diagnostic>)
 fn is_mnemonic(s: &str) -> bool {
     !s.is_empty()
         && s.len() <= 4
-        && s.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit())
+        && s.chars()
+            .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit())
         && s.chars().next().is_some_and(|c| c.is_ascii_uppercase())
 }
 
@@ -354,7 +350,8 @@ mod tests {
 
     #[test]
     fn structural_tokens_are_not_instructions() {
-        let o = sys("LADDER 2 \"M\"\nSOR BST XIC I:1/0 NXB XIC I:1/1 BND OTE O:4/0 EOR\nEND_LADDER\n");
+        let o =
+            sys("LADDER 2 \"M\"\nSOR BST XIC I:1/0 NXB XIC I:1/1 BND OTE O:4/0 EOR\nEND_LADDER\n");
         let r = &o.system.programs[0].rungs[0];
         assert_eq!(r.instructions.len(), 3);
         assert!(r.has_branch);

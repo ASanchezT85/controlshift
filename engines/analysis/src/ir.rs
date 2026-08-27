@@ -47,9 +47,7 @@ impl Operand {
             None
         } else {
             // Take the designator up to the first ':', '/', '.' or '['.
-            let end = raw
-                .find(|c| c == ':' || c == '/' || c == '.' || c == '[')
-                .unwrap_or(raw.len());
+            let end = raw.find([':', '/', '.', '[']).unwrap_or(raw.len());
             let d = raw[..end].trim_start_matches('#');
             if d.is_empty() {
                 None
@@ -73,7 +71,7 @@ impl Operand {
     pub fn io_slot(&self) -> Option<u8> {
         match self.file.as_deref() {
             Some("I") | Some("O") => self.raw[2..]
-                .split(|c| c == '/' || c == '.')
+                .split(['/', '.'])
                 .next()
                 .and_then(|s| s.parse().ok()),
             _ => None,

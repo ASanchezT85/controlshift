@@ -36,8 +36,9 @@ fn run() -> Result<String, String> {
             "--out" => out = Some(val()?.into()),
             "--rulepacks" => pack_dir = val()?.into(),
             "-h" | "--help" => {
-                return Ok("usage: csanalyze --request <file> [--out <file>] [--rulepacks <dir>]"
-                    .into())
+                return Ok(
+                    "usage: csanalyze --request <file> [--out <file>] [--rulepacks <dir>]".into(),
+                )
             }
             other => return Err(format!("unknown argument `{other}`")),
         }
@@ -45,8 +46,8 @@ fn run() -> Result<String, String> {
     let request = request.ok_or("--request is required")?;
     let base = request.parent().unwrap_or(Path::new(".")).to_path_buf();
 
-    let req: AnalysisRequest = serde_json::from_str(&read(&request)?)
-        .map_err(|e| format!("invalid request: {e}"))?;
+    let req: AnalysisRequest =
+        serde_json::from_str(&read(&request)?).map_err(|e| format!("invalid request: {e}"))?;
     let pack_path = pack_dir.join(format!("{}.json", req.rule_pack));
     let pack = engine::RulePack::load(&read(&pack_path)?)?;
 

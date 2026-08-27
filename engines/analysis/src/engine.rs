@@ -124,11 +124,8 @@ fn coverage(pack: &RulePack, keys: &BTreeSet<String>) -> Vec<DomainCoverage> {
     pack.coverage_domains
         .iter()
         .map(|d| {
-            let (present, missing): (Vec<String>, Vec<String>) = d
-                .requires
-                .iter()
-                .cloned()
-                .partition(|r| keys.contains(r));
+            let (present, missing): (Vec<String>, Vec<String>) =
+                d.requires.iter().cloned().partition(|r| keys.contains(r));
             let percent = if d.requires.is_empty() {
                 0
             } else {
@@ -177,13 +174,14 @@ fn evaluate(
             quantity: None,
             source_entities: vec![],
         }),
-        "processor_discontinued" => pack
-            .discontinued_processors
-            .contains(&sys.processor)
-            .then(|| Hit {
-                quantity: None,
-                source_entities: vec![format!("processor:{}", sys.processor)],
-            }),
+        "processor_discontinued" => {
+            pack.discontinued_processors
+                .contains(&sys.processor)
+                .then(|| Hit {
+                    quantity: None,
+                    source_entities: vec![format!("processor:{}", sys.processor)],
+                })
+        }
         "module_present" => {
             let catalog = arg("catalog");
             let slots: Vec<String> = sys
@@ -192,7 +190,7 @@ fn evaluate(
                 .filter(|m| m.catalog == catalog)
                 .map(|m| format!("slot:{}:{}", m.slot, m.catalog))
                 .collect();
-            (!slots.is_empty()).then(|| Hit {
+            (!slots.is_empty()).then_some(Hit {
                 quantity: Some(slots.len() as u32),
                 source_entities: slots,
             })
@@ -209,7 +207,7 @@ fn evaluate(
                     }
                 }
             }
-            (!sites.is_empty()).then(|| Hit {
+            (!sites.is_empty()).then_some(Hit {
                 quantity: Some(sites.len() as u32),
                 source_entities: sites,
             })
@@ -218,13 +216,25 @@ fn evaluate(
             let want_indirect = arg("class") == "INDIRECT";
             let n = sys
                 .operands()
-                .filter(|o| if want_indirect { o.indirect } else { o.is_status() })
+                .filter(|o| {
+                    if want_indirect {
+                        o.indirect
+                    } else {
+                        o.is_status()
+                    }
+                })
                 .count();
             (n > 0).then(|| Hit {
                 quantity: Some(n as u32),
                 source_entities: sys
                     .operands()
-                    .filter(|o| if want_indirect { o.indirect } else { o.is_status() })
+                    .filter(|o| {
+                        if want_indirect {
+                            o.indirect
+                        } else {
+                            o.is_status()
+                        }
+                    })
                     .map(|o| o.raw.clone())
                     .collect::<BTreeSet<_>>()
                     .into_iter()
@@ -233,10 +243,7 @@ fn evaluate(
         }
         "sti_present" => sys.sti.as_ref().map(|s| Hit {
             quantity: Some(1),
-            source_entities: vec![format!(
-                "STI:LAD{}:{}ms",
-                s.program_file, s.interval_ms
-            )],
+            source_entities: vec![format!("STI:LAD{}:{}ms", s.program_file, s.interval_ms)],
         }),
         "evidence_absent" => {
             let key = arg("key");
@@ -373,13 +380,21 @@ fn dependencies(sys: &ControlSystem) -> Vec<Dependency> {
             for i in &r.instructions {
                 for o in i.reads() {
                     if let Some(slot) = o.io_slot() {
-                        set.insert((o.raw.clone(), "READ_BY".to_string(), format!("LAD{}", p.number)));
+                        set.insert((
+                            o.raw.clone(),
+                            "READ_BY".to_string(),
+                            format!("LAD{}", p.number),
+                        ));
                         add_module_edge(sys, slot, &o.raw, &mut set);
                     }
                 }
                 for o in i.writes() {
                     if let Some(slot) = o.io_slot() {
-                        set.insert((format!("LAD{}", p.number), "WRITES".to_string(), o.raw.clone()));
+                        set.insert((
+                            format!("LAD{}", p.number),
+                            "WRITES".to_string(),
+                            o.raw.clone(),
+                        ));
                         add_module_edge(sys, slot, &o.raw, &mut set);
                     }
                 }
@@ -528,7 +543,8 @@ fn migration_paths(_pack: &RulePack, findings: &[Finding]) -> Vec<MigrationPath>
             blocking_findings: blocking("C"),
             notes: vec![
                 "FIXED-PRICE FEASIBILITY UNKNOWN".into(),
-                "Includes HMI, drives and legacy network replacement, none of which are evidenced.".into(),
+                "Includes HMI, drives and legacy network replacement, none of which are evidenced."
+                    .into(),
             ],
         },
     ]
@@ -593,8 +609,13 @@ fn readiness(
         });
     }
 
-    let fixed_price = if reasons.is_empty() { "READY" } else { "NOT_READY" };
-    let budgetary = if (wc.round() as u32) >= pack.budgetary_policy().min_weighted_coverage_percent {
+    let fixed_price = if reasons.is_empty() {
+        "READY"
+    } else {
+        "NOT_READY"
+    };
+    let budgetary = if (wc.round() as u32) >= pack.budgetary_policy().min_weighted_coverage_percent
+    {
         if unknowns.is_empty() {
             "READY"
         } else {

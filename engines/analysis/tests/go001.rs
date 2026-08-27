@@ -64,7 +64,10 @@ fn parses_the_system_model_exactly() {
         assert_eq!(&m["catalog"], catalog, "slot {slot}");
     }
     let progs = s["programs"].as_array().unwrap();
-    let rungs: usize = progs.iter().map(|p| p["rungs"].as_array().unwrap().len()).sum();
+    let rungs: usize = progs
+        .iter()
+        .map(|p| p["rungs"].as_array().unwrap().len())
+        .sum();
     let instrs: usize = progs
         .iter()
         .flat_map(|p| p["rungs"].as_array().unwrap())
@@ -276,8 +279,17 @@ fn spec15_no_unknown_is_silently_resolved() {
         .flat_map(|d| d["missing"].as_array().unwrap())
         .map(|v| v.as_str().unwrap().to_string())
         .collect();
-    for key in ["HMI_PROJECT", "DRIVE_BACKUP", "DEVICENET_CONFIGURATION", "AS_BUILT_DRAWING", "SAFETY_ARCHITECTURE"] {
-        assert!(missing.contains(&key.to_string()), "{key} must read as missing");
+    for key in [
+        "HMI_PROJECT",
+        "DRIVE_BACKUP",
+        "DEVICENET_CONFIGURATION",
+        "AS_BUILT_DRAWING",
+        "SAFETY_ARCHITECTURE",
+    ] {
+        assert!(
+            missing.contains(&key.to_string()),
+            "{key} must read as missing"
+        );
     }
     assert!(!r["unknowns"].as_array().unwrap().is_empty());
     let _ = e;
