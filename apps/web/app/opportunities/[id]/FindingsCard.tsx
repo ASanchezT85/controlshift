@@ -12,6 +12,7 @@ export interface Finding {
   state: string;
   severity: string;
   quantity?: number;
+  source_entities: string[];
   evidence: { source_type: string; publication_id?: string; locator?: string }[];
 }
 

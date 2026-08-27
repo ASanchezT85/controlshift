@@ -82,6 +82,25 @@ Two things the console deliberately makes visible rather than smoothing over:
   determinations recorded on the analysis against the ones in force now and
   asks for a re-analysis instead of silently showing an old answer.
 
+## Dependency graph
+
+Drawn as impact propagation, not as a hairball. 488 edges rendered at once tell
+an engineer nothing; the chain that matters is the one SPEC 22 names:
+
+```
+slot 8 1747-SDN  --scans-->  DeviceNet  --nodes-->  UNDETERMINED
+                 UNDETERMINED  <-- 8 MSG instructions target it
+```
+
+The eight MSG instructions hang off a **separate, undetermined** network node
+rather than off DeviceNet, because nothing in the evidence says which network
+they route over. Attaching them to DeviceNet would draw a route nobody
+established.
+
+Selecting a module shows what rests on it — `slot 6 - 1746-NI4`: three
+addresses, three program files, finding `IO-003`. A Rust test pins the shared
+namespace that link depends on.
+
 ## Report branding
 
 All six configurable elements of SPEC 39: organization name and logo, customer

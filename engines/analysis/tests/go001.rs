@@ -377,3 +377,43 @@ fn work_packages_never_mix_units() {
         );
     }
 }
+
+/// The console links a finding to the module or network it rests on by matching
+/// `source_entities` against dependency-graph node ids. That only works while
+/// both use one namespace, and nothing else in the engine forces them to.
+#[test]
+fn findings_and_the_dependency_graph_share_one_namespace() {
+    let (r, _) = run();
+    let nodes: std::collections::HashSet<&str> = r["dependencies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .flat_map(|d| [d["from"].as_str().unwrap(), d["to"].as_str().unwrap()])
+        .collect();
+
+    // Every module and network a finding names must be a node in the graph.
+    for f in r["findings"].as_array().unwrap() {
+        for e in f["source_entities"].as_array().unwrap() {
+            let entity = e.as_str().unwrap();
+            if entity.starts_with("slot:") || entity.starts_with("network:") {
+                assert!(
+                    nodes.contains(entity),
+                    "{} names {entity}, which is not a node in the dependency graph",
+                    f["id"]
+                );
+            }
+        }
+    }
+
+    // And the scanner finding in particular has to be traceable to the network,
+    // since that chain is what turns a module into a project.
+    let sdn = finding(&r, "NET-001")["source_entities"][0]
+        .as_str()
+        .unwrap();
+    assert!(sdn.starts_with("slot:"));
+    assert!(r["dependencies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|d| d["from"] == sdn && d["to"] == "network:DeviceNet"));
+}

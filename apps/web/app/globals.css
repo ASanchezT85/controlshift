@@ -264,3 +264,46 @@ select {
   flex: 1 1 200px;
   width: auto;
 }
+
+/* Dependency graph */
+.node {
+  fill: var(--surface);
+  stroke: var(--border);
+  cursor: pointer;
+}
+
+.node.module {
+  stroke: var(--accent);
+}
+
+.node.network {
+  stroke: var(--conditional);
+}
+
+.node.unknown {
+  stroke: var(--unknown);
+  stroke-dasharray: 4 3;
+}
+
+.nodetext {
+  fill: var(--text);
+  font-size: 12px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.edge {
+  stroke: var(--muted);
+  stroke-width: 1.2;
+}
+
+.edgetext {
+  fill: var(--muted);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.arrow {
+  fill: var(--muted);
+}

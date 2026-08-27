@@ -7,6 +7,7 @@ import ArtifactsCard from './ArtifactsCard';
 import CommercialCard, { type Assumption, type Exclusion } from './CommercialCard';
 import FindingsCard, { type Finding, type Review } from './FindingsCard';
 import CustomerLogo from './CustomerLogo';
+import DependencyCard from './DependencyCard';
 import GateCard from './GateCard';
 
 const API = process.env.NEXT_PUBLIC_API ?? 'http://127.0.0.1:3000/api';
@@ -56,6 +57,7 @@ interface AnalysisResult {
     sti?: { interval_ms: number } | null;
   };
   evidence_coverage: { domain: string; percent: number; missing: string[] }[];
+  dependencies: { from: string; relation: string; to: string }[];
   findings: Finding[];
   unknowns: {
     id: string;
@@ -415,6 +417,8 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
               </table>
             </div>
           </div>
+
+          <DependencyCard dependencies={r.dependencies} findings={r.findings} />
 
           <div className="card">
             <h2>Migration paths</h2>
