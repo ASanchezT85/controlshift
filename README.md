@@ -261,9 +261,9 @@ points at. See `docs/scanner-setup.md` for the two ways to get one running.
 Smart App Control, when enforced, blocks freshly built Rust **test** binaries
 with `os error 4551`. The product is unaffected — the release binary keeps its
 reputation, so the API, the console and the end-to-end script all run — but
-`cargo test` may refuse to execute locally. Run it in CI or WSL. See
-`docs/windows-notes.md`, which also covers the Docker engine and two smaller
-traps.
+`cargo test` may refuse to execute locally. Run it in WSL instead — same
+toolchain, same result — with the exact commands in `docs/windows-notes.md`,
+which also covers the Docker engine and two smaller traps.
 
 ## Known ceilings
 

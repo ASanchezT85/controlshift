@@ -25,9 +25,23 @@ caught; `target/release/csanalyze.exe` earns a reputation from repeated use and
 keeps running. Rebuilding sometimes clears it and sometimes does not, and
 `CARGO_TARGET_DIR` elsewhere makes it worse — build scripts get blocked too.
 
-What actually works:
+What actually works — WSL, verified:
 
-- **Run the Rust suite in CI or WSL**, where the policy does not apply.
+```bash
+wsl -d Ubuntu -- bash -lc "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal"
+wsl -d Ubuntu -u root -- bash -c "apt-get install -y build-essential"   # the linker
+wsl -d Ubuntu -- bash -lc "cd /mnt/c/laragon/www/controlshift && CARGO_TARGET_DIR=\$HOME/cs-target cargo test"
+```
+
+`CARGO_TARGET_DIR` outside `/mnt/c` matters twice: it keeps the Windows MSVC
+artifacts intact, and it moves the build off the 9p mount, which is slow.
+
+Same toolchain version, same result: 34 tests pass, `cargo fmt --check` clean,
+`cargo clippy -D warnings` clean.
+
+Other options:
+
+- **CI**, where the policy does not apply.
 - Or turn Smart App Control off in Windows Security → App & browser control.
   That is a real reduction in the machine's security posture and it cannot be
   turned back on without reinstalling Windows, so it is a decision for whoever
