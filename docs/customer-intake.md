@@ -77,3 +77,45 @@ If it reports lines outside the assumed grammar, revise
 `docs/slc-ascii-format.md` §2 **before** trusting any finding derived from that
 file. The parser keeps rungs it can read even under an unfamiliar header, but a
 grammar mismatch is a product question, not a parser bug to route around.
+
+## Getting a validation file before there is a customer
+
+The grammar in `docs/slc-ascii-format.md` §2 stays unvalidated until a real
+export runs through `scripts/conform.py`. Ranked ways to get one:
+
+### 1. Free tool + public sample projects (no cost, no customer)
+
+`github.com/anilharish/PLC_Programming` holds nine real `.RSS` projects
+(pump control, boiler, conveyor, timers, counters). Verified genuine: the files
+are OLE2 compound documents whose metadata names **RSLogix Micro Starter Lite**
+as the authoring tool — so the free tool opens them.
+
+- Get RSLogix Micro Starter Lite 8.30 from Rockwell's Product Compatibility and
+  Download Center. It is in the retired-products category now: a free Rockwell
+  account plus an unlock request.
+- Open a sample `.RSS`, then `File > Save As > Export Database > A.B. 6200 >
+  .SLC` with *Complete Program Save*.
+- Run `python scripts/conform.py` on the result.
+
+Caveat: those projects are MicroLogix-class, so the processor and I/O records
+will not look like an SLC 5/03 in a 1746 chassis. They validate the **rung and
+data-file grammar**, not the rack question in §1.3. No license is stated on the
+repository — use them to validate a parser, do not redistribute them.
+
+### 2. RSLogix 500 evaluation (90 days)
+
+The full product, which is the only way to build a genuine SLC 5/03 project with
+a populated 1746 chassis and settle whether the rack is in the `.SLC` or only in
+`Printer.txt`. This is the path that answers §1.3.
+
+### 3. An integrator, before the pilot
+
+Any controls engineer with RSLogix 500 can produce an anonymised export in ten
+minutes. Ask for a decommissioned line: no live process, no commercial
+sensitivity, and the format is identical.
+
+### What "validated" will mean
+
+`scripts/conform.py` reports 100% understood on a real export, **and** the rack
+question in §1.3 is answered one way or the other. Until both hold, §1 stays
+marked PARTIALLY VALIDATED.
