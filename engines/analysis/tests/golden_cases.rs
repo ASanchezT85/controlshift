@@ -273,13 +273,20 @@ fn every_rule_has_a_positive_and_a_negative_fixture() {
             missing.push(format!("{} has no negative fixture", rule.id));
         }
     }
-    assert!(missing.is_empty(), "untested rules:\n  {}", missing.join("\n  "));
+    assert!(
+        missing.is_empty(),
+        "untested rules:\n  {}",
+        missing.join("\n  ")
+    );
 }
 
 /// Every case must actually assert something, or it is decoration.
 #[test]
 fn no_case_is_vacuous() {
-    for dir in case_dirs("atomic").into_iter().chain(case_dirs("composite")) {
+    for dir in case_dirs("atomic")
+        .into_iter()
+        .chain(case_dirs("composite"))
+    {
         let c = load(&dir);
         let asserts = c.expect_findings.len()
             + c.expect_absent.len()
