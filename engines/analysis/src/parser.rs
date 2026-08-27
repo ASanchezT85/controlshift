@@ -30,6 +30,17 @@ struct Ctx {
 }
 
 impl Ctx {
+    fn warn(&mut self, code: &str, msg: String, line: usize, column: usize) {
+        self.diags.push(Diagnostic {
+            severity: "WARNING".into(),
+            code: code.into(),
+            message: msg,
+            artifact: self.artifact.clone(),
+            line,
+            column,
+        });
+    }
+
     fn err(&mut self, code: &str, msg: String, line: usize, column: usize) {
         self.diags.push(Diagnostic {
             severity: "ERROR".into(),
@@ -175,20 +186,30 @@ pub fn parse(artifact: &str, src: &str) -> ParseOutput {
                     1,
                 ),
             },
-            "SOR" => match current.as_mut() {
-                None => ctx.err(
-                    "E_RUNG_OUTSIDE_LADDER",
-                    "rung outside a LADDER block".into(),
-                    l.number,
-                    1,
-                ),
-                Some(prog) => {
-                    let index = prog.rungs.len();
-                    let (rung, mut d) = parse_rung(&ctx.artifact, &l, index);
-                    ctx.diags.append(&mut d);
-                    prog.rungs.push(rung);
+            "SOR" => {
+                if current.is_none() {
+                    // Keep the rung. The SOR..EOR layer is the part of the
+                    // format that is confirmed; an unrecognised container is
+                    // no reason to drop the logic inside it.
+                    ctx.warn(
+                        "W_RUNG_OUTSIDE_LADDER",
+                        "rung found outside any recognised program block;                          attributed to UNATTRIBUTED"
+                            .into(),
+                        l.number,
+                        1,
+                    );
+                    current = Some(Program {
+                        number: 0,
+                        name: "UNATTRIBUTED".into(),
+                        rungs: Vec::new(),
+                    });
                 }
-            },
+                let prog = current.as_mut().expect("just created");
+                let index = prog.rungs.len();
+                let (rung, mut d) = parse_rung(&ctx.artifact, &l, index);
+                ctx.diags.append(&mut d);
+                prog.rungs.push(rung);
+            }
             other => ctx.err(
                 "E_UNKNOWN_KEYWORD",
                 format!("unrecognized keyword `{other}`"),
@@ -367,13 +388,44 @@ mod tests {
     }
 
     #[test]
+    fn a_foreign_header_does_not_delete_the_program() {
+        // The public record confirms SOR..EOR and BST/NXB/BND; it does not
+        // confirm our header spelling. A header we cannot read must cost us
+        // the header, never the logic.
+        let o = sys("*** UNKNOWN VENDOR HEADER ***
+PROC_TYPE=1747-L553
+$SLOT 00 1747-L553
+             LADDER FILE 2
+SOR XIC I:1/0 OTE O:4/0 EOR
+SOR IIM I:1.0 1 EOR
+");
+        assert_eq!(
+            o.system.rung_count(),
+            2,
+            "rungs must survive an unreadable header"
+        );
+        assert_eq!(
+            o.system.count_opcode("IIM"),
+            1,
+            "the IIM must still be found"
+        );
+        assert!(o
+            .diagnostics
+            .iter()
+            .any(|d| d.code == "W_RUNG_OUTSIDE_LADDER"));
+    }
+
+    #[test]
     fn malformed_input_diagnoses_instead_of_crashing() {
         let o = sys("SLOT abc 1746-IB16\nSOR XIC I:1/0\nEND_LADDER\nWAT\n");
         let codes: Vec<&str> = o.diagnostics.iter().map(|d| d.code.as_str()).collect();
         assert!(codes.contains(&"E_BAD_NUMBER"));
-        assert!(codes.contains(&"E_RUNG_OUTSIDE_LADDER"));
-        assert!(codes.contains(&"E_STRAY_END_LADDER"));
         assert!(codes.contains(&"E_UNKNOWN_KEYWORD"));
+        assert!(codes.contains(&"E_UNTERMINATED_RUNG"));
+        // The orphan rung opens an UNATTRIBUTED program, so the END_LADDER that
+        // follows closes it legitimately rather than reading as stray.
+        assert!(codes.contains(&"W_RUNG_OUTSIDE_LADDER"));
+        assert_eq!(o.system.rung_count(), 1, "the rung is kept, not discarded");
     }
 
     #[test]
@@ -381,6 +433,13 @@ mod tests {
         let o = sys("LADDER 2 \"M\"\nSOR XIC I:1/0 OTE O:4/0\nEND_LADDER\n");
         assert_eq!(o.system.programs[0].rungs[0].instructions.len(), 2);
         assert_eq!(o.diagnostics[0].code, "E_UNTERMINATED_RUNG");
+    }
+
+    #[test]
+    fn a_genuinely_stray_end_ladder_is_still_reported() {
+        let o = sys("END_LADDER
+");
+        assert_eq!(o.diagnostics[0].code, "E_STRAY_END_LADDER");
     }
 
     #[test]

@@ -1,0 +1,26 @@
+{
+  "id": "G1-017",
+  "class": "ATOMIC",
+  "description": "A header this parser cannot read costs us the header, never the logic: the rungs survive, the IIM is still found, and the assessment is BLOCKED rather than quietly empty.",
+  "expect_findings": [
+    {
+      "id": "PARSE-001",
+      "state": "BLOCKED"
+    },
+    {
+      "id": "SW-003",
+      "state": "BLOCKED",
+      "quantity": 1
+    }
+  ],
+  "expect_absent": [
+    "LIFE-001",
+    "IO-001",
+    "NET-001"
+  ],
+  "expect_diagnostics": [
+    "E_UNKNOWN_KEYWORD",
+    "W_RUNG_OUTSIDE_LADDER"
+  ],
+  "expect_min_blockers": 2
+}

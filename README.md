@@ -99,6 +99,10 @@ that path and no default ControlShift claims as universal.
 - Input is the **RSLogix 500 ASCII export**, not the binary `.SLC`. See
   `docs/slc-ascii-format.md` — the grammar is assumed and must be verified
   against a real customer export before the first pilot.
+- A source the parser cannot read is BLOCKED, never quiet. Rungs survive an
+  unrecognised header (`G1-017`), and `PARSE-001` fires when zero rungs come
+  back or errors exceed 10% of them — otherwise a foreign header would produce
+  an empty model and an assessment that reads as "nothing wrong".
 - The golden is synthetic. It hits the SPEC 59 counts exactly; it does not
   contain the rarities a real 20-year-old project will.
 - Rule predicates are a closed compiled registry, not an expression DSL.

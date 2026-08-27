@@ -153,6 +153,40 @@
   ],
   "rules": [
     {
+      "id": "PARSE-001",
+      "predicate": "source_not_understood",
+      "args": {
+        "max_error_ratio": "0.1"
+      },
+      "category": "SOURCE_NOT_UNDERSTOOD",
+      "state": "BLOCKED",
+      "severity": "HIGH",
+      "certainty": "FACT",
+      "unit_type": "ITEM",
+      "title": "Supplied program source was not fully understood",
+      "description": "The parser reconstructed no rungs, or rejected a large share of the supplied lines. Every software finding depends on that reconstruction, so their absence here means nothing was examined - not that nothing was found. The export format must be confirmed before this assessment carries any weight.",
+      "work_packages": [
+        "DISCOVERY",
+        "PLC_PROGRAM_REVIEW"
+      ],
+      "evidence": [
+        {
+          "source_type": "STRUCTURED_PARSE",
+          "locator": "parser diagnostics"
+        }
+      ],
+      "unknown": {
+        "missing_information": "A program export this parser can read",
+        "affected_domains": [
+          "PLC_LOGIC"
+        ],
+        "commercial_impact": "No software scope can be quantified from this source",
+        "technical_impact": "No instruction, PID, MSG, IIM, indirect or status finding can be established",
+        "recommended_resolution": "Confirm the export procedure (File > Save As > Export Database > A.B.6200 > Complete Program Save) and re-supply, or send the export format for parser support",
+        "estimate_allowance_profile": "RESOLVE_BEFORE_QUOTE"
+      }
+    },
+    {
       "id": "LIFE-001",
       "predicate": "processor_discontinued",
       "category": "LIFECYCLE",

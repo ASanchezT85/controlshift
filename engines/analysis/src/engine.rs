@@ -167,6 +167,7 @@ fn evaluate(
     sys: &ControlSystem,
     pack: &RulePack,
     keys: &BTreeSet<String>,
+    diagnostics: &[Diagnostic],
 ) -> Option<Hit> {
     let arg = |k: &str| rule.args.get(k).map(String::as_str).unwrap_or("");
     match rule.predicate.as_str() {
@@ -245,6 +246,33 @@ fn evaluate(
             quantity: Some(1),
             source_entities: vec![format!("STI:LAD{}:{}ms", s.program_file, s.interval_ms)],
         }),
+        // A source we could not read must never present as a clean bill of
+        // health. Zero rungs from a supplied PLC source, or a high proportion
+        // of rejected lines, is a BLOCKED finding - not an absence of findings.
+        "source_not_understood" => {
+            let has_source = req
+                .artifacts
+                .iter()
+                .any(|a| a.artifact_type == "PLC_SOURCE");
+            if !has_source {
+                return None;
+            }
+            let rungs = sys.rung_count();
+            let errors = diagnostics.iter().filter(|d| d.severity == "ERROR").count();
+            let max_ratio: f64 = arg("max_error_ratio").parse().unwrap_or(0.1);
+            let ratio = if rungs == 0 {
+                f64::INFINITY
+            } else {
+                errors as f64 / rungs as f64
+            };
+            (rungs == 0 || ratio > max_ratio).then(|| Hit {
+                quantity: Some(errors as u32),
+                source_entities: vec![
+                    format!("rungs_reconstructed:{rungs}",),
+                    format!("parser_errors:{errors}"),
+                ],
+            })
+        }
         "evidence_absent" => {
             let key = arg("key");
             (!keys.contains(key)).then(|| Hit {
@@ -261,13 +289,14 @@ fn evaluate(
 }
 
 fn unknown_predicates(pack: &RulePack) -> Vec<String> {
-    const KNOWN: [&str; 6] = [
+    const KNOWN: [&str; 7] = [
         "always",
         "processor_discontinued",
         "module_present",
         "opcode_count",
         "operand_class_count",
         "sti_present",
+        "source_not_understood",
     ];
     pack.rules
         .iter()
@@ -301,7 +330,7 @@ pub fn analyze(
     let mut findings = Vec::new();
     let mut unknowns = Vec::new();
     for rule in &pack.rules {
-        let Some(hit) = evaluate(rule, req, &sys, pack, &keys) else {
+        let Some(hit) = evaluate(rule, req, &sys, pack, &keys, &diagnostics) else {
             continue;
         };
         let title = match hit.quantity {
