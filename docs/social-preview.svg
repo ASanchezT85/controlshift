@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-label="ControlShift — industrial migration preflight. Migration readiness: fixed price not ready, budgetary ready with allowances, time and material ready. Evidence coverage: PLC logic 100 percent, hardware 100 percent, network 33 percent, HMI 0, drives 0, safety 0.">
+  <rect width="1280" height="640" fill="#f6f7f9"/>
+
+  <g transform="translate(72,74)">
+    <rect x="0" y="0" width="58" height="80" rx="6" fill="none" stroke="#1f4f8b" stroke-width="4.5"/>
+    <rect x="12" y="13" width="34" height="11" rx="2" fill="#1f4f8b"/>
+    <rect x="12" y="34" width="34" height="11" rx="2" fill="#1f4f8b"/>
+    <rect x="12" y="55" width="34" height="11" rx="2" fill="#1f4f8b"/>
+  </g>
+
+  <text x="156" y="136" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="66" font-weight="700" fill="#16191d">ControlShift</text>
+  <text x="159" y="178" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="25" fill="#5c6570">Industrial migration preflight</text>
+  <rect x="159" y="200" width="112" height="3" fill="#1f4f8b"/>
+  <text x="159" y="246" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="22" fill="#16191d">Know what you're agreeing to deliver</text>
+  <text x="159" y="276" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="22" fill="#16191d">before you quote a PLC migration.</text>
+
+  <!-- verdict -->
+  <rect x="700" y="74" width="508" height="204" rx="8" fill="#ffffff" stroke="#dfe3e8" stroke-width="2"/>
+  <text x="726" y="110" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#5c6570" letter-spacing="1.4">MIGRATION READINESS</text>
+  <line x1="726" y1="122" x2="1182" y2="122" stroke="#dfe3e8" stroke-width="1.5"/>
+
+  <rect x="726" y="140" width="4" height="24" fill="#a8202b"/>
+  <text x="744" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#16191d">FIXED PRICE</text>
+  <text x="1182" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#a8202b" font-weight="700" text-anchor="end">NOT READY</text>
+
+  <rect x="726" y="184" width="4" height="24" fill="#8a5a00"/>
+  <text x="744" y="202" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#16191d">BUDGETARY</text>
+  <text x="1182" y="202" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8a5a00" font-weight="700" text-anchor="end">READY WITH ALLOWANCES</text>
+
+  <rect x="726" y="228" width="4" height="24" fill="#1e6b3a"/>
+  <text x="744" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#16191d">TIME AND MATERIAL</text>
+  <text x="1182" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#1e6b3a" font-weight="700" text-anchor="end">READY</text>
+
+  <!-- evidence coverage: the empty bars are the message -->
+  <rect x="72" y="318" width="560" height="250" rx="8" fill="#ffffff" stroke="#dfe3e8" stroke-width="2"/>
+  <text x="96" y="352" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#5c6570" letter-spacing="1.4">EVIDENCE COVERAGE</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">
+    <text x="96" y="388" fill="#16191d">PLC LOGIC</text>
+    <rect x="248" y="377" width="280" height="13" rx="2" fill="#eef1f4"/>
+    <rect x="248" y="377" width="280" height="13" rx="2" fill="#1f4f8b"/>
+    <text x="608" y="388" fill="#5c6570" text-anchor="end">100%</text>
+
+    <text x="96" y="418" fill="#16191d">HARDWARE</text>
+    <rect x="248" y="407" width="280" height="13" rx="2" fill="#eef1f4"/>
+    <rect x="248" y="407" width="280" height="13" rx="2" fill="#1f4f8b"/>
+    <text x="608" y="418" fill="#5c6570" text-anchor="end">100%</text>
+
+    <text x="96" y="448" fill="#16191d">NETWORK</text>
+    <rect x="248" y="437" width="280" height="13" rx="2" fill="#eef1f4"/>
+    <rect x="248" y="437" width="92" height="13" rx="2" fill="#1f4f8b"/>
+    <text x="608" y="448" fill="#5c6570" text-anchor="end">33%</text>
+
+    <text x="96" y="478" fill="#16191d">HMI</text>
+    <rect x="248" y="467" width="280" height="13" rx="2" fill="#ffffff" stroke="#8a5a00" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="608" y="478" fill="#8a5a00" font-weight="700" text-anchor="end">0%</text>
+
+    <text x="96" y="508" fill="#16191d">DRIVES</text>
+    <rect x="248" y="497" width="280" height="13" rx="2" fill="#ffffff" stroke="#8a5a00" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="608" y="508" fill="#8a5a00" font-weight="700" text-anchor="end">0%</text>
+
+    <text x="96" y="538" fill="#16191d">SAFETY</text>
+    <rect x="248" y="527" width="280" height="13" rx="2" fill="#ffffff" stroke="#8a5a00" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="608" y="538" fill="#8a5a00" font-weight="700" text-anchor="end">0%</text>
+  </g>
+
+  <!-- one rung, drawn the way ladder is actually drawn: contacts and a coil
+       between two rails. SOR, EOR, BST, NXB and BND are tokens of the text
+       export and are never graphical elements. -->
+  <rect x="700" y="318" width="508" height="250" rx="8" fill="#ffffff" stroke="#dfe3e8" stroke-width="2"/>
+  <text x="726" y="352" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#5c6570" letter-spacing="1.4">LADDER · ONE RUNG</text>
+
+  <g stroke="#16191d" stroke-width="2.4" fill="none" stroke-linecap="square">
+    <line x1="736" y1="392" x2="736" y2="516"/>
+    <line x1="1172" y1="392" x2="1172" y2="516"/>
+
+    <line x1="736" y1="424" x2="790" y2="424"/>
+    <line x1="790" y1="410" x2="790" y2="438"/>
+    <line x1="808" y1="410" x2="808" y2="438"/>
+    <line x1="808" y1="424" x2="868" y2="424"/>
+
+    <line x1="868" y1="424" x2="868" y2="478"/>
+    <line x1="868" y1="424" x2="920" y2="424"/>
+    <line x1="920" y1="410" x2="920" y2="438"/>
+    <line x1="938" y1="410" x2="938" y2="438"/>
+    <line x1="938" y1="424" x2="1000" y2="424"/>
+
+    <line x1="868" y1="478" x2="920" y2="478"/>
+    <line x1="920" y1="464" x2="920" y2="492"/>
+    <line x1="938" y1="464" x2="938" y2="492"/>
+    <line x1="938" y1="478" x2="1000" y2="478"/>
+    <line x1="1000" y1="424" x2="1000" y2="478"/>
+
+    <line x1="1000" y1="424" x2="1100" y2="424"/>
+    <path d="M1100 408 A 18 18 0 0 0 1100 440"/>
+    <path d="M1128 408 A 18 18 0 0 1 1128 440"/>
+    <line x1="1128" y1="424" x2="1172" y2="424"/>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#5c6570" text-anchor="middle">
+    <text x="799" y="400">XIC I:1/0</text>
+    <text x="929" y="400">XIC I:1/1</text>
+    <text x="929" y="510">XIC I:2/8</text>
+    <text x="1114" y="400">OTE O:4/0</text>
+  </g>
+
+  <rect x="0" y="632" width="1280" height="8" fill="#1f4f8b"/>
+</svg>

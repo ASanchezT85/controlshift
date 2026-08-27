@@ -1,5 +1,7 @@
 # ControlShift
 
+![ControlShift — industrial migration preflight](docs/banner.svg)
+
 **Industrial migration preflight for Allen-Bradley SLC 500 → CompactLogix.**
 
 Turns legacy PLC exports and incomplete documentation into scope, unknowns and

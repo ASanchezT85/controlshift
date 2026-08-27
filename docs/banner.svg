@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="400" viewBox="0 0 1600 400" role="img" aria-label="ControlShift — industrial migration preflight. An SLC 500 chassis with the 1747-SDN scanner in slot 8, and a migration readiness verdict: fixed price not ready, budgetary ready with allowances, time and material ready.">
+  <rect width="1600" height="400" fill="#f6f7f9"/>
+
+  <!-- mark: a chassis seen end-on, three modules in a rail -->
+  <g transform="translate(64,112)">
+    <rect x="0" y="0" width="52" height="72" rx="5" fill="none" stroke="#1f4f8b" stroke-width="4"/>
+    <rect x="11" y="12" width="30" height="10" rx="2" fill="#1f4f8b"/>
+    <rect x="11" y="31" width="30" height="10" rx="2" fill="#1f4f8b"/>
+    <rect x="11" y="50" width="30" height="10" rx="2" fill="#1f4f8b"/>
+  </g>
+
+  <text x="136" y="168" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="60" font-weight="700" fill="#16191d">ControlShift</text>
+  <text x="139" y="206" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="23" fill="#5c6570">Industrial migration preflight</text>
+  <rect x="139" y="228" width="104" height="3" fill="#1f4f8b"/>
+  <text x="139" y="278" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="21" fill="#16191d">Know what you're agreeing to deliver</text>
+  <text x="139" y="306" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="21" fill="#16191d">before you quote a PLC migration.</text>
+
+  <!-- the rack: a power supply outside the slots, then slots 0 through 9 -->
+  <text x="640" y="98" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#5c6570" letter-spacing="1.4">SLC 500 · 1746-A10 CHASSIS</text>
+  <rect x="640" y="112" width="440" height="182" rx="7" fill="#ffffff" stroke="#dfe3e8" stroke-width="2"/>
+
+  <!-- power supply, deliberately not a numbered slot -->
+  <rect x="656" y="128" width="34" height="150" rx="3" fill="#eef1f4" stroke="#dfe3e8" stroke-width="1.5"/>
+  <rect x="661" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+  <text x="673" y="272" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" fill="#5c6570" text-anchor="middle">PS</text>
+
+  <!-- slot 0: the processor is a 1747 part, not a 1746 -->
+  <rect x="693" y="128" width="34" height="150" rx="3" fill="#ffffff" stroke="#c9d1d9" stroke-width="1.5"/>
+  <rect x="698" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+  <rect x="700" y="150" width="6" height="6" rx="1" fill="#1e6b3a"/>
+  <rect x="700" y="161" width="6" height="6" rx="1" fill="#8a5a00"/>
+
+  <rect x="730" y="128" width="34" height="150" rx="3" fill="#ffffff" stroke="#c9d1d9" stroke-width="1.5"/>
+  <rect x="735" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+  <rect x="767" y="128" width="34" height="150" rx="3" fill="#ffffff" stroke="#c9d1d9" stroke-width="1.5"/>
+  <rect x="772" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+  <rect x="804" y="128" width="34" height="150" rx="3" fill="#ffffff" stroke="#c9d1d9" stroke-width="1.5"/>
+  <rect x="809" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+  <rect x="841" y="128" width="34" height="150" rx="3" fill="#ffffff" stroke="#c9d1d9" stroke-width="1.5"/>
+  <rect x="846" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+  <rect x="878" y="128" width="34" height="150" rx="3" fill="#ffffff" stroke="#c9d1d9" stroke-width="1.5"/>
+  <rect x="883" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+  <rect x="915" y="128" width="34" height="150" rx="3" fill="#ffffff" stroke="#c9d1d9" stroke-width="1.5"/>
+  <rect x="920" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+  <rect x="952" y="128" width="34" height="150" rx="3" fill="#ffffff" stroke="#c9d1d9" stroke-width="1.5"/>
+  <rect x="957" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+
+  <!-- slot 8: the scanner, the module that makes this a project -->
+  <rect x="989" y="128" width="34" height="150" rx="3" fill="#1f4f8b" stroke="#1f4f8b" stroke-width="1.5"/>
+  <rect x="994" y="134" width="24" height="7" rx="1.5" fill="#7ea3cd"/>
+  <rect x="996" y="150" width="6" height="6" rx="1" fill="#7fd3a0"/>
+  <rect x="996" y="161" width="6" height="6" rx="1" fill="#f0868e"/>
+
+  <rect x="1026" y="128" width="34" height="150" rx="3" fill="#ffffff" stroke="#c9d1d9" stroke-width="1.5"/>
+  <rect x="1031" y="134" width="24" height="7" rx="1.5" fill="#dfe3e8"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#5c6570" text-anchor="middle">
+    <text x="710" y="312">0</text>
+    <text x="747" y="312">1</text>
+    <text x="784" y="312">2</text>
+    <text x="821" y="312">3</text>
+    <text x="858" y="312">4</text>
+    <text x="895" y="312">5</text>
+    <text x="932" y="312">6</text>
+    <text x="969" y="312">7</text>
+    <text x="1006" y="312" fill="#1f4f8b" font-weight="700">8</text>
+    <text x="1043" y="312">9</text>
+  </g>
+  <text x="860" y="342" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#1f4f8b" text-anchor="middle">SLOT 8 · 1747-SDN · NETWORK SCANNER</text>
+
+  <!-- the verdict -->
+  <rect x="1128" y="112" width="408" height="182" rx="7" fill="#ffffff" stroke="#dfe3e8" stroke-width="2"/>
+  <text x="1152" y="146" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#5c6570" letter-spacing="1.4">MIGRATION READINESS</text>
+  <line x1="1152" y1="158" x2="1512" y2="158" stroke="#dfe3e8" stroke-width="1.5"/>
+
+  <rect x="1152" y="176" width="4" height="24" fill="#a8202b"/>
+  <text x="1170" y="194" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#16191d">FIXED PRICE</text>
+  <text x="1512" y="194" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#a8202b" font-weight="700" text-anchor="end">NOT READY</text>
+
+  <rect x="1152" y="220" width="4" height="24" fill="#8a5a00"/>
+  <text x="1170" y="238" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#16191d">BUDGETARY</text>
+  <text x="1512" y="238" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#8a5a00" font-weight="700" text-anchor="end">READY WITH ALLOWANCES</text>
+
+  <rect x="1152" y="264" width="4" height="24" fill="#1e6b3a"/>
+  <text x="1170" y="282" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#16191d">TIME AND MATERIAL</text>
+  <text x="1512" y="282" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#1e6b3a" font-weight="700" text-anchor="end">READY</text>
+
+  <rect x="0" y="394" width="1600" height="6" fill="#1f4f8b"/>
+</svg>
