@@ -30,9 +30,23 @@ pub fn analyze_request(
         return Err("V1 analyzes one PLC_SOURCE per request".into());
     }
     if let Some(a) = sources.first() {
-        let out = parser::parse(&a.path, &read(&base.join(&a.path))?);
-        system = out.system;
-        diagnostics = out.diagnostics;
+        // A customer's first instinct is to send the native project file. That
+        // must produce a BLOCKED finding with a way forward, not an I/O error.
+        match read_source(&base.join(&a.path))? {
+            Ok(text) => {
+                let out = parser::parse(&a.path, &text);
+                system = out.system;
+                diagnostics = out.diagnostics;
+            }
+            Err(reason) => diagnostics.push(parser::Diagnostic {
+                severity: "ERROR".into(),
+                code: "E_SOURCE_NOT_TEXT".into(),
+                message: reason,
+                artifact: a.path.clone(),
+                line: 0,
+                column: 0,
+            }),
+        }
     } else {
         diagnostics.push(parser::Diagnostic {
             severity: "ERROR".into(),
@@ -47,6 +61,21 @@ pub fn analyze_request(
     Ok(engine::analyze(req, pack, system, diagnostics))
 }
 
-fn read(p: &Path) -> Result<String, String> {
-    std::fs::read_to_string(p).map_err(|e| format!("{}: {e}", p.display()))
+/// Outer Result: the file could not be opened. Inner Result: the file is not
+/// the text export we analyze, and we say which file it looks like instead.
+fn read_source(p: &Path) -> Result<Result<String, String>, String> {
+    let bytes = std::fs::read(p).map_err(|e| format!("{}: {e}", p.display()))?;
+    if bytes.starts_with(&[0xD0, 0xCF, 0x11, 0xE0]) {
+        return Ok(Err(
+            "this is a native RSLogix 500 project (.RSS), not the ASCII export.              Re-export with File > Save As > Export Database > A.B. 6200 > .SLC,              Complete Program Save."
+                .into(),
+        ));
+    }
+    match String::from_utf8(bytes) {
+        Ok(text) => Ok(Ok(text)),
+        Err(_) => Ok(Err(
+            "the supplied source is not text this parser can read; the ASCII export              is expected"
+                .into(),
+        )),
+    }
 }

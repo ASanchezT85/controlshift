@@ -149,6 +149,16 @@ test('archives, executables and unknown extensions are refused', async () => {
   }
 });
 
+test('a native project file is refused with the export procedure attached', async () => {
+  // OLE2 magic: what a real .RSS starts with.
+  const rss = Buffer.concat([Buffer.from([0xd0, 0xcf, 0x11, 0xe0]), Buffer.alloc(32)]);
+  const res = await upload('LINE04.RSS', rss);
+  assert.equal(res.status, 400);
+  const message = ((await res.json()) as any).message;
+  assert.match(message, /A\.B\. 6200/);
+  assert.match(message, /Complete Program Save/);
+});
+
 test('an empty file is refused', async () => {
   const res = await upload('empty.csv', Buffer.alloc(0));
   assert.equal(res.status, 400);

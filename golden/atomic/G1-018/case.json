@@ -1,0 +1,18 @@
+{
+  "id": "G1-018",
+  "class": "ATOMIC",
+  "description": "The native RSLogix project (.RSS) sent instead of the ASCII export - the most likely customer mistake. It must BLOCK with a way forward, never fail as an I/O error and never analyse as empty.",
+  "expect_findings": [
+    {
+      "id": "PARSE-001",
+      "state": "BLOCKED"
+    }
+  ],
+  "expect_diagnostics": [
+    "E_SOURCE_NOT_TEXT"
+  ],
+  "expect_quote_readiness": {
+    "fixed_price": "NOT_READY"
+  },
+  "expect_min_blockers": 1
+}

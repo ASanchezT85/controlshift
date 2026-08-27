@@ -1,0 +1,16 @@
+{
+  "id": "G1-019",
+  "class": "ATOMIC",
+  "description": "One example of every operand SHAPE observed in three real RSLogix 500 projects (github.com/anilharish/PLC_Programming, read out of the zlib-compressed PROGRAM FILES stream). Addresses are facts, not authored content; the projects themselves are not redistributed. Every one of these must parse clean.",
+  "expect_findings": [
+    {
+      "id": "SW-005",
+      "state": "REVIEW_REQUIRED"
+    }
+  ],
+  "expect_absent": [
+    "PARSE-001",
+    "SW-003"
+  ],
+  "expect_diagnostics": []
+}

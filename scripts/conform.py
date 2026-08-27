@@ -28,7 +28,8 @@ MNEMONIC = re.compile(r"^[A-Z][A-Z0-9]{0,3}$")
 # Operand shapes documented in docs/slc-ascii-format.md.
 OPERAND = re.compile(
     r"""^(
-        \#?[A-Z]+\d*:\[?[A-Z]*\d*:?\d*\]?[./][A-Z0-9]+   # N7:20/3, T4:0/DN, I:6.0
+        [A-Z]+\d*:\d+\.\d+/[A-Z0-9]+                     # I:1.0/0  slot.word/bit
+      | \#?[A-Z]+\d*:\[?[A-Z]*\d*:?\d*\]?[./][A-Z0-9]+   # N7:20/3, T4:0/DN, I:6.0
       | [A-Z]+\d*:\d+[HL]                                 # S:3H, S:3L (byte of a word)
       | \#?[A-Z]+\d*:\[?[A-Z]*\d*:?\d*\]?                # N7:20, N7:[N7:10]
       | [A-Z]+\d*\[[A-Z]+\d*:\d+\](/\d+)?                # B3[N7:10]/0

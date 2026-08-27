@@ -38,6 +38,15 @@ const ALLOWED: Record<string, ArtifactType> = {
 // decompression path, so there is no archive bomb to bound.
 const REFUSED = ['zip', 'rar', '7z', 'tar', 'gz', 'exe', 'dll', 'bat', 'ps1', 'sh', 'js'];
 
+/// Files a customer sends in good faith that we cannot read. A bare "not
+/// accepted" wastes a round trip; each of these knows what to ask for instead.
+const GUIDANCE: Record<string, string> = {
+  rss: 'this is the native RSLogix 500 project. Re-export it: File > Save As > Export Database > A.B. 6200 > .SLC, with Complete Program Save and all export options',
+  rsp: 'this is a native RSLogix 5 project. V1 supports SLC 500 only',
+  acd: 'this is a Studio 5000 project. V1 analyzes the SOURCE platform, an SLC 500 export',
+  sys6: 'the .SYS6 symbol database is useful, but upload it alongside the .SLC program export, not instead of it',
+};
+
 /// Always absolute: the engine runs from a temp directory and joins these
 /// paths, so a relative root would resolve against the wrong place.
 export function storageRoot(): string {
@@ -81,6 +90,9 @@ export class ArtifactsService {
     const ext = filename.split('.').pop()?.toLowerCase() ?? '';
     if (REFUSED.includes(ext)) {
       throw new BadRequestException(`.${ext} files are not accepted`);
+    }
+    if (GUIDANCE[ext]) {
+      throw new BadRequestException(`.${ext} files are not accepted: ${GUIDANCE[ext]}`);
     }
     const inferred = ALLOWED[ext];
     if (!inferred) throw new BadRequestException(`.${ext} files are not accepted`);

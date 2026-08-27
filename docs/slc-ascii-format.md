@@ -37,6 +37,31 @@ Note also that `Tools > Database > ASCII Export` inside RSLogix 500 exports the
 **tag database only**, never the ladder ([Industrial Monitor Direct][imd-export]).
 If a customer sends "the ASCII export" they may well send symbols and no logic.
 
+### Validated against three real projects (2026-08-27)
+
+Three genuine RSLogix 500 projects were read from
+`github.com/anilharish/PLC_Programming`. A `.RSS` is an OLE2 compound document
+whose `PROGRAM FILES` stream is zlib-compressed MFC-serialised objects
+(`CProgHolder`, `CLadFile`, `CRung`, `CBranchLeg`, `CIns`), and **operands are
+stored as display-form text**. 143 distinct operands were lifted out and run
+through our parser:
+
+| | Result |
+|---|---|
+| Operands parsed | 143 / 143 |
+| Diagnostics | 0 |
+| Unclassified | 0 |
+| File designators seen | `B3` `T4` `I` `N7` `O` `C5` `S` `F8` `PD9` |
+
+That validates the **operand layer against real-world data**, and it corrected
+one gap: the `I:1.0/0` slot-word-bit form is common in real projects and the
+conformance harness did not recognise it. Fixture: `golden/atomic/G1-019`, one
+example of each of the 13 shapes observed.
+
+It does **not** validate the rung or header layer, because a `.RSS` is not the
+export: the ladder structure in it is a compiled object graph, not `SOR … EOR`
+text.
+
 ### NOT confirmed — treat as invented until a real file arrives
 
 1. **Every header keyword in §2.** `PROJECT`, `PROCESSOR`, `PROCESSOR_OS`,
@@ -122,6 +147,11 @@ This is the part that matters, because §1 says the header probably **is** wrong
   when parser errors exceed 10% of reconstructed rungs. Without it, a header we
   cannot read produces an empty model, no software findings, and an assessment
   that reads as "nothing wrong" — the exact false-safe of SPEC 63.
+- **The native project file is refused with a way forward.** A source starting
+  with the OLE2 magic `D0 CF 11 E0` is recognised as a `.RSS` and produces
+  `E_SOURCE_NOT_TEXT` plus `PARSE-001 BLOCKED`, carrying the export procedure —
+  not an I/O error. Sending the `.RSS` is the likeliest customer mistake.
+  Fixture: `golden/atomic/G1-018`.
 - Malformed input never crashes the parser (SPEC 72); every rejected line
   carries file, line, column and the offending token.
 
