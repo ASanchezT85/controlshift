@@ -147,6 +147,20 @@ login.
 - **Infected bytes never reach the object store.** The scan runs before
   anything is written, so a rejection leaves nothing to clean up. The upload
   returns 400 with the signature and the rejection is audited.
+
+Verified against a real ClamAV 1.5.3 with current signatures, not only against
+the protocol stub:
+
+```
+POST /artifacts (EICAR)  ->  400 "rejected by malware scanning: Eicar-Test-Signature"
+audit                    ->  artifact.rejected, signature recorded
+artifact row             ->  none
+object store             ->  nothing written
+POST /artifacts (clean)  ->  201, processingStatus SCANNED
+```
+
+`scripts/smoke_scanner.sh` re-proves that against whatever clamd `CLAMD_HOST`
+points at. See `docs/scanner-setup.md` for the two ways to get one running.
 - **Intake refuses rather than inspects.** Archives and executables are rejected
   by extension; nothing is unpacked, so there is no archive bomb to bound. The
   extension only *suggests* a type - a PDF is an electrical drawing or a network
