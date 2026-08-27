@@ -250,7 +250,11 @@ test('all three deliverables generate, and none invents HMI effort', async () =>
     }
     if (kind === 'PROPOSAL_INPUT_PACKAGE') {
       assert.match(html, /CANDIDATE — NOT RELEASED FOR PROCUREMENT/);
-      assert.match(html, /Proposed exclusions/);
+      // This opportunity has no exclusion recorded, so the package must SAY
+      // nothing is excluded rather than leave the section out. An absent
+      // section reads as an oversight; a stated absence is a commitment.
+      assert.match(html, /No exclusion has been approved. Nothing is excluded from this scope\./);
+      assert.match(html, /None recorded\. Nothing in this package rests on a stated assumption\./);
       // SPEC 28: a scope item must trace back to the rule and evidence.
       assert.match(html, /RA-2026\.08::/);
     }
