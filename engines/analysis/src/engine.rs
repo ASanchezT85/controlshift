@@ -322,6 +322,7 @@ pub fn analyze(
             } else {
                 "SUPPORTED".into()
             },
+            unit_type: rule.unit_type.clone().unwrap_or_else(|| "ITEM".into()),
             quantity: hit.quantity,
             source_entities: hit.source_entities.into_iter().take(64).collect(),
             affected_entities: vec![],
@@ -442,19 +443,26 @@ fn add_module_edge(
     }
 }
 
+/// Work packages are keyed by (code, unit type). Two findings that trigger the
+/// same package in DIFFERENT units are different lines: 2 instruction rewrites
+/// and 11 indirect references are not 13 of anything. Summing them once
+/// produced a 13-unit line that priced two IIM rewrites as thirteen.
 fn work_packages(findings: &[Finding]) -> Vec<WorkPackageRef> {
-    let mut acc: BTreeMap<String, (u32, Vec<String>)> = BTreeMap::new();
+    let mut acc: BTreeMap<(String, String), (u32, Vec<String>)> = BTreeMap::new();
     for f in findings {
+        let unit = f.unit_type.clone();
         for wp in &f.work_packages {
-            let e = acc.entry(wp.clone()).or_insert((0, vec![]));
+            let e = acc
+                .entry((wp.clone(), unit.clone()))
+                .or_insert((0, vec![]));
             e.0 += f.quantity.unwrap_or(1);
             e.1.push(f.id.clone());
         }
     }
     acc.into_iter()
-        .map(|(code, (quantity, triggered_by))| WorkPackageRef {
+        .map(|((code, unit_type), (quantity, triggered_by))| WorkPackageRef {
             code,
-            unit_type: "DERIVED".into(),
+            unit_type,
             quantity,
             triggered_by,
         })

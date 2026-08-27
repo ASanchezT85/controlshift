@@ -48,6 +48,22 @@ FIXED_PRICE READY when they are declared and the evidence is complete; `G2-003` 
 the same system with review incomplete and must not. Without that pair, the
 NOT_READY of GO-001 would prove nothing.
 
+## Estimating and deliverables
+
+Hours come from the organization's own effort templates, keyed by **(work
+package, unit)**. Nothing else produces an hour figure — there is no model in
+that path and no default ControlShift claims as universal.
+
+- A work package with no template is reported **NOT PRICED** and excluded from
+  the range, never silently valued at zero. `DISCOVERY` is deliberately
+  template-less: its size is exactly what is unknown.
+- Unknowns never become hours. They become a disclosed allowance decision.
+- The three deliverables of SPEC 38 render from the stored `AnalysisResult`:
+  Engineering Preflight, Proposal Input Package, Customer Information Request.
+  Each scope line in the proposal package traces back
+  `work package ← finding ← rule ← evidence`, and each document is written once
+  to `storage/reports/` with its SHA-256; regenerating creates a new row.
+
 ## Application-layer boundaries
 
 - **Tenancy and RBAC are tested, not asserted.** `services/api/src/tenancy.test.ts`

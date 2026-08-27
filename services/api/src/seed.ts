@@ -10,6 +10,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { hashPassword } from './auth';
+import { STARTER_TEMPLATES } from './estimating';
 import { storageRoot } from './artifacts';
 
 const prisma = new PrismaClient();
@@ -37,6 +38,31 @@ async function main() {
   const tenant =
     (await prisma.tenant.findFirst({ where: { name: 'Northstar Integrators' } })) ??
     (await prisma.tenant.create({ data: { name: 'Northstar Integrators' } }));
+
+  await prisma.tenant.update({
+    where: { id: tenant.id },
+    data: {
+      brandName: 'Northstar Integrators',
+      reportFooter:
+        'Northstar Integrators - preflight assessment - not for construction or procurement',
+    },
+  });
+
+  // Starter effort templates. They belong to the organization from the moment
+  // they are written and are expected to be replaced with its real numbers.
+  for (const t of STARTER_TEMPLATES) {
+    await prisma.effortTemplate.upsert({
+      where: {
+        tenantId_workPackageCode_unitType: {
+          tenantId: tenant.id,
+          workPackageCode: t.workPackageCode,
+          unitType: t.unitType,
+        },
+      },
+      create: { ...t, tenantId: tenant.id },
+      update: {},
+    });
+  }
 
   for (const [email, name, role] of USERS) {
     const existing = await prisma.user.findFirst({ where: { tenantId: tenant.id, email } });

@@ -57,6 +57,9 @@ jobs:
       - run: npm run build --prefix services/api
       # Tenant isolation and RBAC are security boundaries: they gate merge.
       - run: node --test services/api/dist/tenancy.test.js
+      # Estimating and the three deliverables. Pins the IIM rewrite at two
+      # instructions and fails if starter templates drift from the rule pack.
+      - run: node --test services/api/dist/estimating.test.js
 
   web:
     runs-on: ubuntu-latest

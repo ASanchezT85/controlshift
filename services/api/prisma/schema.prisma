@@ -17,9 +17,44 @@ model Tenant {
   name      String
   createdAt DateTime @default(now())
 
+  // Report branding (MASTER SPEC 39). B2B2B: the integrator's name goes on the
+  // cover, the end customer's name comes from the opportunity.
+  brandName   String?
+  brandLogo   String? // data: URI, kept small on purpose
+  reportFooter String?
+
+  // Organization estimating policy (SPEC 32/33). Owned by the organization,
+  // never by ControlShift.
+  uncertaintyAllowancePercent Float @default(15)
+
   users         User[]
   opportunities Opportunity[]
   auditEvents   AuditEvent[]
+  effortTemplates EffortTemplate[]
+}
+
+/// An organization's own effort template (SPEC 32). ControlShift ships defaults
+/// as a starting point and claims no universal engineering-hour values.
+model EffortTemplate {
+  id       String @id @default(uuid())
+  tenantId String
+
+  workPackageCode String
+  unitType        String
+  role            String
+
+  minHoursPerUnit Float
+  maxHoursPerUnit Float
+  /// Multiplies both ends. 1.0 unless the organization says otherwise.
+  complexityFactor Float @default(1.0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, workPackageCode, unitType])
+  @@index([tenantId])
 }
 
 enum Role {
@@ -166,8 +201,37 @@ model Analysis {
 
   opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
   reviews     FindingReview[]
+  reports     Report[]
 
   @@index([opportunityId, startedAt])
+}
+
+enum ReportKind {
+  ENGINEERING_PREFLIGHT
+  PROPOSAL_INPUT_PACKAGE
+  CUSTOMER_INFORMATION_REQUEST
+}
+
+/// A generated deliverable (SPEC 38). Immutable once written: regenerating
+/// produces a new row, so a document that was sent can always be reproduced.
+model Report {
+  id         String @id @default(uuid())
+  analysisId String
+
+  kind ReportKind
+
+  storageLocation String
+  sha256          String
+  sizeBytes       Int
+
+  reportSchemaVersion String
+
+  generatedBy String
+  createdAt   DateTime @default(now())
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId, kind])
 }
 
 enum ReviewAction {

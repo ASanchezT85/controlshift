@@ -59,6 +59,8 @@ pub struct Finding {
     pub severity: String,
     pub certainty: String,
     pub evidence_strength: String,
+    /// The unit the quantity is counted in. Never mixed across a work package.
+    pub unit_type: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quantity: Option<u32>,
     pub source_entities: Vec<String>,
