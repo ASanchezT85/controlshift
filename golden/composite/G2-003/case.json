@@ -1,0 +1,30 @@
+{
+  "id": "G2-003",
+  "class": "COMPOSITE",
+  "description": "Same clean system, human review NOT complete: identical evidence must not reach READY.",
+  "evidence": [
+    "SYMBOL_DATABASE",
+    "IO_LIST",
+    "FIELD_DEVICE_LIST",
+    "ELECTRICAL_DRAWING",
+    "AS_BUILT_DRAWING",
+    "NETWORK_DRAWING",
+    "DEVICENET_NODE_ADDRESSES",
+    "DEVICENET_CONFIGURATION",
+    "HMI_PROJECT",
+    "HMI_MODEL_IDENTIFIED",
+    "DRIVE_BACKUP",
+    "DRIVE_MODEL_IDENTIFIED",
+    "SAFETY_ARCHITECTURE",
+    "SAFETY_DEVICE_LIST",
+    "CUSTOMER_NOTE",
+    "PHOTO"
+  ],
+  "shutdown_hours": 12,
+  "expect_quote_readiness": {
+    "fixed_price": "NOT_READY"
+  },
+  "expect_reason_contains": [
+    "engineering review"
+  ]
+}

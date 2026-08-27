@@ -1,0 +1,16 @@
+{
+  "id": "G1-003",
+  "class": "ATOMIC",
+  "description": "Two PID loops: counted exactly, review required, never PASS.",
+  "expect_findings": [
+    {
+      "id": "SW-001",
+      "state": "REVIEW_REQUIRED",
+      "quantity": 2
+    }
+  ],
+  "expect_absent": [
+    "SW-003",
+    "SW-002"
+  ]
+}

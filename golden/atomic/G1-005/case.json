@@ -1,0 +1,16 @@
+{
+  "id": "G1-005",
+  "class": "ATOMIC",
+  "description": "Indirect addressing: two bracketed operands, counted per operand not per rung.",
+  "expect_findings": [
+    {
+      "id": "SW-004",
+      "state": "REVIEW_REQUIRED",
+      "quantity": 2
+    }
+  ],
+  "expect_absent": [
+    "SW-005",
+    "SW-003"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "G1-014",
+  "class": "ATOMIC",
+  "description": "All evidence supplied: the five evidence-gap rules must stay silent.",
+  "evidence": [
+    "SYMBOL_DATABASE",
+    "IO_LIST",
+    "FIELD_DEVICE_LIST",
+    "ELECTRICAL_DRAWING",
+    "AS_BUILT_DRAWING",
+    "NETWORK_DRAWING",
+    "DEVICENET_NODE_ADDRESSES",
+    "DEVICENET_CONFIGURATION",
+    "HMI_PROJECT",
+    "HMI_MODEL_IDENTIFIED",
+    "DRIVE_BACKUP",
+    "DRIVE_MODEL_IDENTIFIED",
+    "SAFETY_ARCHITECTURE",
+    "SAFETY_DEVICE_LIST",
+    "CUSTOMER_NOTE",
+    "PHOTO"
+  ],
+  "expect_findings": [],
+  "expect_absent": [
+    "NET-002",
+    "HMI-001",
+    "DRV-001",
+    "DOC-001",
+    "SAF-001"
+  ],
+  "expect_no_unknowns": true
+}

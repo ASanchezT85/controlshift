@@ -1,0 +1,14 @@
+{
+  "id": "G1-002",
+  "class": "ATOMIC",
+  "description": "No IIM: the unsupported-instruction rule must stay silent (negative fixture).",
+  "expect_findings": [],
+  "expect_absent": [
+    "SW-003",
+    "SW-001",
+    "SW-002",
+    "SW-004",
+    "SW-005",
+    "ARCH-001"
+  ]
+}

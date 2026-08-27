@@ -1,0 +1,20 @@
+{
+  "id": "G1-001",
+  "class": "ATOMIC",
+  "description": "IIM present: unsupported instruction must BLOCK, never migrate silently.",
+  "expect_findings": [
+    {
+      "id": "SW-003",
+      "state": "BLOCKED",
+      "quantity": 1
+    }
+  ],
+  "expect_absent": [
+    "SW-001",
+    "SW-002",
+    "SW-004",
+    "SW-005",
+    "ARCH-001",
+    "NET-001"
+  ]
+}

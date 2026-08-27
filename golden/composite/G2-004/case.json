@@ -1,0 +1,43 @@
+{
+  "id": "G2-004",
+  "class": "COMPOSITE",
+  "description": "Blocking finding with otherwise complete evidence and review: a blocker alone refuses fixed price.",
+  "evidence": [
+    "SYMBOL_DATABASE",
+    "IO_LIST",
+    "FIELD_DEVICE_LIST",
+    "ELECTRICAL_DRAWING",
+    "AS_BUILT_DRAWING",
+    "NETWORK_DRAWING",
+    "DEVICENET_NODE_ADDRESSES",
+    "DEVICENET_CONFIGURATION",
+    "HMI_PROJECT",
+    "HMI_MODEL_IDENTIFIED",
+    "DRIVE_BACKUP",
+    "DRIVE_MODEL_IDENTIFIED",
+    "SAFETY_ARCHITECTURE",
+    "SAFETY_DEVICE_LIST",
+    "CUSTOMER_NOTE",
+    "PHOTO"
+  ],
+  "shutdown_hours": 12,
+  "engineering_review_complete": true,
+  "shutdown_feasible": true,
+  "expect_findings": [
+    {
+      "id": "NET-001",
+      "state": "BLOCKED"
+    },
+    {
+      "id": "SW-003",
+      "state": "BLOCKED",
+      "quantity": 1
+    }
+  ],
+  "expect_quote_readiness": {
+    "fixed_price": "NOT_READY"
+  },
+  "expect_reason_contains": [
+    "blocking finding"
+  ]
+}

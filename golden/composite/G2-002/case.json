@@ -1,0 +1,49 @@
+{
+  "id": "G2-002",
+  "class": "COMPOSITE",
+  "description": "Fully evidenced clean system with human review complete: the gate can and does reach READY. Without this case, the NOT_READY of GO-001 would prove nothing.",
+  "evidence": [
+    "SYMBOL_DATABASE",
+    "IO_LIST",
+    "FIELD_DEVICE_LIST",
+    "ELECTRICAL_DRAWING",
+    "AS_BUILT_DRAWING",
+    "NETWORK_DRAWING",
+    "DEVICENET_NODE_ADDRESSES",
+    "DEVICENET_CONFIGURATION",
+    "HMI_PROJECT",
+    "HMI_MODEL_IDENTIFIED",
+    "DRIVE_BACKUP",
+    "DRIVE_MODEL_IDENTIFIED",
+    "SAFETY_ARCHITECTURE",
+    "SAFETY_DEVICE_LIST",
+    "CUSTOMER_NOTE",
+    "PHOTO"
+  ],
+  "shutdown_hours": 12,
+  "engineering_review_complete": true,
+  "shutdown_feasible": true,
+  "expect_findings": [
+    {
+      "id": "IO-001",
+      "state": "CONDITIONAL",
+      "quantity": 1
+    }
+  ],
+  "expect_absent": [
+    "NET-002",
+    "HMI-001",
+    "DRV-001",
+    "DOC-001",
+    "SAF-001",
+    "NET-001",
+    "SW-003",
+    "LIFE-001"
+  ],
+  "expect_quote_readiness": {
+    "fixed_price": "READY",
+    "budgetary": "READY",
+    "time_and_material": "READY"
+  },
+  "expect_min_blockers": 0
+}

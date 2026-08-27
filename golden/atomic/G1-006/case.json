@@ -1,0 +1,16 @@
+{
+  "id": "G1-006",
+  "class": "ATOMIC",
+  "description": "Status-file references: four S: operands, counted per operand.",
+  "expect_findings": [
+    {
+      "id": "SW-005",
+      "state": "REVIEW_REQUIRED",
+      "quantity": 4
+    }
+  ],
+  "expect_absent": [
+    "SW-004",
+    "SW-003"
+  ]
+}

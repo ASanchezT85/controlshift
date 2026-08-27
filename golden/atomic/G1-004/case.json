@@ -1,0 +1,16 @@
+{
+  "id": "G1-004",
+  "class": "ATOMIC",
+  "description": "Three MSG instructions: each must be re-targeted, none assumed complete.",
+  "expect_findings": [
+    {
+      "id": "SW-002",
+      "state": "REVIEW_REQUIRED",
+      "quantity": 3
+    }
+  ],
+  "expect_absent": [
+    "SW-001",
+    "SW-003"
+  ]
+}

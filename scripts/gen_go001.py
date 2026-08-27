@@ -386,7 +386,7 @@ def main():
         if p.is_file():
             rel = p.relative_to(SRC).as_posix()
             manifest.append({
-                "path": rel,
+                "path": f"artifacts/{rel}",
                 "artifact_type": artifact_type(rel),
                 "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
                 "size": p.stat().st_size,

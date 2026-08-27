@@ -1,0 +1,15 @@
+{
+  "id": "G1-016",
+  "class": "ATOMIC",
+  "description": "Malformed source: diagnostics are produced and nothing is reported safe.",
+  "expect_diagnostics": [
+    "E_MISSING_OPERAND",
+    "E_BAD_NUMBER",
+    "E_UNKNOWN_KEYWORD",
+    "E_RUNG_OUTSIDE_LADDER",
+    "E_STRAY_END_LADDER",
+    "E_UNTERMINATED_RUNG",
+    "E_UNCLOSED_LADDER"
+  ],
+  "expect_no_pass_findings": true
+}

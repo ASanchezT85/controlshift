@@ -32,6 +32,12 @@ pub struct AnalysisRequest {
     pub proposal_type: String,
     #[serde(default)]
     pub shutdown_hours: Option<f64>,
+    /// Human determinations the engine cannot make for itself (SPEC 35).
+    /// Absent means NOT established - never assumed true.
+    #[serde(default)]
+    pub engineering_review_complete: bool,
+    #[serde(default)]
+    pub shutdown_feasible: bool,
     pub rule_pack: String,
 }
 

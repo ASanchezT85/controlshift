@@ -1,0 +1,9 @@
+{
+  "id": "G1-013",
+  "class": "ATOMIC",
+  "description": "Processor outside the discontinued list: lifecycle rule stays silent (boundary).",
+  "expect_findings": [],
+  "expect_absent": [
+    "LIFE-001"
+  ]
+}

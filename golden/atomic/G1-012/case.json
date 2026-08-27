@@ -1,0 +1,11 @@
+{
+  "id": "G1-012",
+  "class": "ATOMIC",
+  "description": "Discontinued processor: lifecycle condition raised from OEM data.",
+  "expect_findings": [
+    {
+      "id": "LIFE-001",
+      "state": "REVIEW_REQUIRED"
+    }
+  ]
+}

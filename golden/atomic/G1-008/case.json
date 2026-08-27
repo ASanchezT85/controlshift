@@ -1,0 +1,9 @@
+{
+  "id": "G1-008",
+  "class": "ATOMIC",
+  "description": "No STI: the timing rule must stay silent (boundary fixture).",
+  "expect_findings": [],
+  "expect_absent": [
+    "ARCH-001"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "G1-015",
+  "class": "ATOMIC",
+  "description": "No evidence beyond the program: every evidence gap must surface, none resolved silently.",
+  "expect_findings": [
+    {
+      "id": "NET-002",
+      "state": "UNKNOWN"
+    },
+    {
+      "id": "HMI-001",
+      "state": "UNKNOWN"
+    },
+    {
+      "id": "DRV-001",
+      "state": "UNKNOWN"
+    },
+    {
+      "id": "SAF-001",
+      "state": "UNKNOWN"
+    },
+    {
+      "id": "DOC-001",
+      "state": "REVIEW_REQUIRED"
+    }
+  ]
+}

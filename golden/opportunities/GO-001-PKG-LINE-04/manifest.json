@@ -2,61 +2,61 @@
   "opportunity": "GO-001-PKG-LINE-04",
   "artifacts": [
     {
-      "path": "customer_notes.txt",
+      "path": "artifacts/customer_notes.txt",
       "artifact_type": "CUSTOMER_NOTE",
       "sha256": "5cbbbfb081a8b351b3a4ad4e567c85cb0fbd971f4c2e4f0c4643895d9e4255e5",
       "size": 934
     },
     {
-      "path": "ELECTRICAL_REV_C.pdf",
+      "path": "artifacts/ELECTRICAL_REV_C.pdf",
       "artifact_type": "ELECTRICAL_DRAWING",
       "sha256": "9e2b9ce4c9f8133bd5654bc59e912ec4279bdcd6fb91da2468dad1df238f44ce",
       "size": 1063
     },
     {
-      "path": "NETWORK_SKETCH.pdf",
+      "path": "artifacts/NETWORK_SKETCH.pdf",
       "artifact_type": "NETWORK_DRAWING",
       "sha256": "11a8d42df3357f307e3b4f3e0af6df4a460d1ec52d5615e8b25e4ec498bf58f6",
       "size": 1044
     },
     {
-      "path": "photos/01_panel_interior.txt",
+      "path": "artifacts/photos/01_panel_interior.txt",
       "artifact_type": "PHOTO",
       "sha256": "80517d1ce5d91a0103a3a6fab96fde6e2741adb4b5ca312a6fb6e5acbca871d2",
       "size": 58
     },
     {
-      "path": "photos/02_slot8_sdn.txt",
+      "path": "artifacts/photos/02_slot8_sdn.txt",
       "artifact_type": "PHOTO",
       "sha256": "8e716077c91b29a9a12e6bb08eba0c0cbda53f3dd5aff47f5771c82a08cb6843",
       "size": 75
     },
     {
-      "path": "photos/03_panelview.txt",
+      "path": "artifacts/photos/03_panelview.txt",
       "artifact_type": "PHOTO",
       "sha256": "d5c0e941d331d541ba46a8d8e58927eae452ab7b869ce80e222f40078b35ddcb",
       "size": 79
     },
     {
-      "path": "photos/04_vfd01.txt",
+      "path": "artifacts/photos/04_vfd01.txt",
       "artifact_type": "PHOTO",
       "sha256": "0f037a8017c1c633dfd6e753c6a45cb75ed5818f7dcc75b339b9b491cc2e134d",
       "size": 79
     },
     {
-      "path": "PKG04.SLC",
+      "path": "artifacts/PKG04.SLC",
       "artifact_type": "PLC_SOURCE",
       "sha256": "b877d40f986fe12c27cd84fa8c8e1eb816596279bc27e4bf95b4cebd4a25a18e",
       "size": 55588
     },
     {
-      "path": "PKG04_IO_LIST.xlsx",
+      "path": "artifacts/PKG04_IO_LIST.xlsx",
       "artifact_type": "IO_LIST",
-      "sha256": "7b8c5a3ac1def46a5b7991f2b636ae1ce7141aa27d55414ac808d97f3214b0be",
-      "size": 5285
+      "sha256": "b33596f0c7fb99e2f52ed506516db6eb908b4054cef15904a8d674498b37ae31",
+      "size": 5284
     },
     {
-      "path": "PKG04_SYMBOLS.CSV",
+      "path": "artifacts/PKG04_SYMBOLS.CSV",
       "artifact_type": "SYMBOL_DATABASE",
       "sha256": "e96a0b89337756b296134e268e7414dfc92da2028fd04010cd7020d98b48473b",
       "size": 997

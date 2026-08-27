@@ -30,7 +30,7 @@ pub fn analyze_request(
         return Err("V1 analyzes one PLC_SOURCE per request".into());
     }
     if let Some(a) = sources.first() {
-        let out = parser::parse(&a.path, &read(&base.join("artifacts").join(&a.path))?);
+        let out = parser::parse(&a.path, &read(&base.join(&a.path))?);
         system = out.system;
         diagnostics = out.diagnostics;
     } else {

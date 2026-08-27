@@ -597,10 +597,10 @@ fn readiness(
             wc, fp.min_weighted_coverage_percent
         ));
     }
-    if fp.requires_engineering_review_complete {
+    if fp.requires_engineering_review_complete && !req.engineering_review_complete {
         reasons.push("engineering review of findings is not complete".into());
     }
-    if fp.requires_shutdown_feasible {
+    if fp.requires_shutdown_feasible && !req.shutdown_feasible {
         reasons.push(match req.shutdown_hours {
             Some(h) => format!(
                 "shutdown feasibility within {h} h cannot be established while the DeviceNet, HMI, drive and safety scope are unknown"

@@ -1,0 +1,35 @@
+{
+  "id": "G1-011",
+  "class": "ATOMIC",
+  "description": "Every discrete and analog module type: each maps CONDITIONAL, never PASS.",
+  "expect_findings": [
+    {
+      "id": "IO-001",
+      "state": "CONDITIONAL",
+      "quantity": 2
+    },
+    {
+      "id": "IO-002",
+      "state": "CONDITIONAL",
+      "quantity": 1
+    },
+    {
+      "id": "IO-003",
+      "state": "CONDITIONAL",
+      "quantity": 1
+    },
+    {
+      "id": "IO-004",
+      "state": "CONDITIONAL",
+      "quantity": 1
+    },
+    {
+      "id": "IO-005",
+      "state": "CONDITIONAL",
+      "quantity": 1
+    }
+  ],
+  "expect_absent": [
+    "NET-001"
+  ]
+}

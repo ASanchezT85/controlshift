@@ -1,0 +1,15 @@
+{
+  "id": "G1-007",
+  "class": "ATOMIC",
+  "description": "STI declared: becomes a periodic task, timing review required.",
+  "expect_findings": [
+    {
+      "id": "ARCH-001",
+      "state": "REVIEW_REQUIRED",
+      "quantity": 1
+    }
+  ],
+  "expect_absent": [
+    "SW-003"
+  ]
+}

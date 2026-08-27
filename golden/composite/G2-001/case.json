@@ -1,0 +1,59 @@
+{
+  "id": "G2-001",
+  "class": "COMPOSITE",
+  "description": "Scanner plus unsupported instruction plus no evidence: blockers accumulate and fixed price is refused.",
+  "shutdown_hours": 8,
+  "expect_findings": [
+    {
+      "id": "NET-001",
+      "state": "BLOCKED"
+    },
+    {
+      "id": "SW-003",
+      "state": "BLOCKED",
+      "quantity": 1
+    },
+    {
+      "id": "SW-001",
+      "state": "REVIEW_REQUIRED",
+      "quantity": 1
+    },
+    {
+      "id": "SW-002",
+      "state": "REVIEW_REQUIRED",
+      "quantity": 1
+    },
+    {
+      "id": "SW-004",
+      "state": "REVIEW_REQUIRED",
+      "quantity": 1
+    },
+    {
+      "id": "SW-005",
+      "state": "REVIEW_REQUIRED",
+      "quantity": 1
+    },
+    {
+      "id": "ARCH-001",
+      "state": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "IO-001",
+      "state": "CONDITIONAL",
+      "quantity": 1
+    },
+    {
+      "id": "LIFE-001",
+      "state": "REVIEW_REQUIRED"
+    },
+    {
+      "id": "LIFE-002",
+      "state": "REVIEW_REQUIRED"
+    }
+  ],
+  "expect_quote_readiness": {
+    "fixed_price": "NOT_READY",
+    "time_and_material": "READY"
+  },
+  "expect_min_blockers": 2
+}

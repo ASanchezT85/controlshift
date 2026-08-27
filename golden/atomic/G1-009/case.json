@@ -1,0 +1,24 @@
+{
+  "id": "G1-009",
+  "class": "ATOMIC",
+  "description": "1747-SDN in the rack: DeviceNet cannot be carried over, path A is blocked.",
+  "expect_findings": [
+    {
+      "id": "NET-001",
+      "state": "BLOCKED",
+      "quantity": 1
+    }
+  ],
+  "expect_absent": [
+    "IO-001",
+    "IO-002",
+    "IO-003",
+    "IO-004",
+    "IO-005"
+  ],
+  "expect_path_blocked": {
+    "A": [
+      "NET-001"
+    ]
+  }
+}
