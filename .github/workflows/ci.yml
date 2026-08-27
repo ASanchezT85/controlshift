@@ -1,6 +1,3 @@
-# NOT RUNNING. This repository has no remote and no Actions runner: this
-# file is here for the day it is published, and nothing executes it today.
-# The verification that actually runs is scripts/verify.sh, on the machine.
 name: CI
 on: [push, pull_request]
 
@@ -14,8 +11,8 @@ jobs:
           components: clippy, rustfmt
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
-      # Unit + parser + GO-001 acceptance. A false-safe finding fails here and
-      # blocks merge (MASTER SPEC 71).
+      # Unit, parser, GO-001 acceptance and the golden classes. A false-safe
+      # finding fails here and blocks merge (MASTER SPEC 71).
       - run: cargo test --all
 
   golden:
@@ -26,7 +23,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install openpyxl
-      # The golden must be reproducible byte-for-byte from its generator.
+      # Byte-for-byte reproducible or it is not a fixture. openpyxl stamps the
+      # time into the workbook, so this is a live trap, not a formality.
       - run: python scripts/gen_go001.py
       - run: git diff --exit-code -- golden/
 
@@ -46,45 +44,79 @@ jobs:
     env:
       DATABASE_URL: postgresql://controlshift:controlshift@127.0.0.1:5432/controlshift?schema=public
       JWT_SECRET: ci-secret
+      # No clamd on the runner. The scanner itself is covered by scanner.test.ts
+      # and uploads.test.ts, which drive the INSTREAM protocol against a stub
+      # daemon in-process; this flag is the documented development override that
+      # lets the rest of the pipeline run without one.
+      ALLOW_UNSCANNED_ARTIFACTS: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       # The API shells out to the engine, so the binary has to exist first.
       - run: cargo build --release
-      - run: npm ci --prefix services/api
-      - run: npx --prefix services/api prisma migrate deploy --schema services/api/prisma/schema.prisma
-      - run: npx --prefix services/api prisma generate --schema services/api/prisma/schema.prisma
-      - run: npm run build --prefix services/api
-      # Tenant isolation and RBAC are security boundaries: they gate merge.
-      - run: node --test services/api/dist/tenancy.test.js
-      # Estimating and the three deliverables. Pins the IIM rewrite at two
-      # instructions and fails if starter templates drift from the rule pack.
-      - run: node --test services/api/dist/estimating.test.js
-      # Artifact intake: the scanning gate must block analysis by default.
-      - run: node --test services/api/dist/uploads.test.js
-      # Assumptions and exclusions, including the separation of duties.
-      - run: node --test services/api/dist/commercial.test.js
-      # Branding, including the logo scheme validation.
-      - run: node --test services/api/dist/branding.test.js
-      # The clamd protocol is hand-written and must fail closed.
-      - run: node --test services/api/dist/scanner.test.js
-      # The whole product, end to end: upload, scan, analyse, review, price,
-      # report. Runs against the API it starts itself.
-      - run: |
-          node services/api/dist/seed.js
-          node services/api/dist/main.js & sleep 5
-          python scripts/e2e_go001.py
+
+      - name: install, migrate, build
+        working-directory: services/api
+        run: |
+          npm ci
+          npx prisma migrate deploy
+          npx prisma generate
+          npm run build
+
+      # Each suite named, so a failure says which boundary broke.
+      - name: tenancy and RBAC
+        working-directory: services/api
+        run: node --test dist/tenancy.test.js
+      - name: artifact intake
+        working-directory: services/api
+        run: node --test dist/uploads.test.js
+      - name: malware scanner protocol
+        working-directory: services/api
+        run: node --test dist/scanner.test.js
+      - name: estimating and deliverables
+        working-directory: services/api
+        run: node --test dist/estimating.test.js
+      - name: assumptions and exclusions
+        working-directory: services/api
+        run: node --test dist/commercial.test.js
+      - name: report branding
+        working-directory: services/api
+        run: node --test dist/branding.test.js
+
+      # The whole product: create, upload, scan, analyse, review, scope, price,
+      # report, audit. The seed and the API resolve the engine and the golden
+      # relative to their own directory, so both run from services/api.
+      - name: seed
+        working-directory: services/api
+        run: node dist/seed.js
+      - name: end to end
+        working-directory: services/api
+        run: |
+          node dist/main.js &
+          for i in $(seq 1 30); do
+            curl -s -o /dev/null http://127.0.0.1:3000/api/opportunities && break
+            [ "$i" = "30" ] && { echo "API never came up"; exit 1; }
+            sleep 1
+          done
+          python ../../scripts/e2e_go001.py
 
   web:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm ci --prefix apps/web
-      - run: npx --prefix apps/web tsc --noEmit -p apps/web/tsconfig.json
-      - run: npm run build --prefix apps/web
+      - run: npm ci
+      - run: npx tsc --noEmit -p tsconfig.json
+      - run: npm run build

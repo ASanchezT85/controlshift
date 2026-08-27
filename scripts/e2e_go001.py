@@ -152,9 +152,23 @@ def main():
     scanned = statuses.count("SCANNED")
     check(
         scanned == len(statuses),
-        "every artifact cleared malware scanning",
+        "every artifact cleared the scanning gate",
         f"{scanned}/{len(statuses)} SCANNED",
     )
+
+    # How they cleared it is not the same fact as that they cleared it. The
+    # audit trail records what the scanner actually said, so the run reports
+    # the mode it ran in rather than implying one.
+    events = api.request("GET", "/audit?take=100", who="admin")
+    uploads = [e for e in events if e["action"] == "artifact.uploaded"
+               and (e.get("detail") or {}).get("opportunityId") == oid]
+    modes = {(e["detail"] or {}).get("scan") for e in uploads}
+    scanner_live = modes == {"CLEAN"}
+    check(bool(uploads), "every upload is audited with what the scanner said",
+          ", ".join(sorted(m or "?" for m in modes)))
+    if not scanner_live:
+        print("  [note] no scanner answered: artifacts were accepted under "
+              "ALLOW_UNSCANNED_ARTIFACTS")
 
     print("\n3. ANALYSIS")
     analysis = api.request("POST", f"/opportunities/{oid}/analyses", {}, who="engineer")
@@ -302,7 +316,10 @@ def main():
         print("\n(leaving the opportunity in place; pass --keep to silence this note)")
 
     print(f"\n{ok_count} checks passed in {time.time() - started:.1f}s")
-    print("GO-001 runs end to end through the product, scanner included.")
+    print(
+        "GO-001 runs end to end through the product"
+        + (", scanned by a live clamd." if scanner_live else ", with scanning overridden.")
+    )
 
 
 if __name__ == "__main__":
