@@ -1,123 +1,187 @@
 # ControlShift
 
-Industrial Migration Preflight. Authority: `CONTROL SHIFT — MASTER SPECIFICATION V1`.
+**Industrial migration preflight for Allen-Bradley SLC 500 → CompactLogix.**
 
-**V1 success criterion (SPEC 79):** ControlShift correctly analyzes `GO-001 — PKG-LINE-04`
-from raw artifacts to commercial readiness without fabricating certainty.
+Turns legacy PLC exports and incomplete documentation into scope, unknowns and
+quote-readiness — before an integrator commits to a fixed price.
 
-## Current state
+Nothing here touches a controller. ControlShift reads copies of offline
+artifacts: it never opens a session with a PLC, never scans an OT network,
+never uploads, never downloads, and never modifies a project file in place.
+That is not a promise in a document, it is the shape of the code — there is no
+industrial protocol library in the dependency tree to do it with.
 
-Deterministic core only. No web app, no API, no database yet — those wrap the
-engine once the engine is right.
+![engine](https://img.shields.io/badge/engine-Rust%201.98-b7410e)
+![api](https://img.shields.io/badge/api-Node%2022%20%C2%B7%20NestJS-3178c6)
+![db](https://img.shields.io/badge/db-PostgreSQL%2017-336791)
+![status](https://img.shields.io/badge/status-V1%20in%20progress-8a5a00)
 
-```
-golden/atomic/G1-0xx/                      one migration condition per case
-golden/composite/G2-0xx/                   interacting conditions + the readiness gate
-golden/opportunities/GO-001-PKG-LINE-04/   synthetic golden opportunity + expected.json
-engines/analysis/                          Rust: lexer -> parser -> IR -> graph -> rules
-rulepacks/rockwell/RA-2026.08.json         versioned, deterministic migration rules
-docs/slc-ascii-format.md                   the input grammar the parser is written against
-scripts/gen_go001.py                       regenerates the golden (asserts SPEC 57/58/59)
-```
+---
 
-## Run it
+## What it answers
+
+A system integrator is handed an old PLC program, drawings from 2014, some
+photos, no HMI backup, no drive parameters, a 12-hour shutdown window and a
+request for a fixed price. The question is not *"how do I convert this
+program?"* It is:
+
+> **What exactly am I agreeing to deliver if I quote this?**
+
+ControlShift answers, for one migration opportunity:
+
+| Question | Where it comes from |
+|---|---|
+| What is in the existing control system? | deterministic parse of the program export |
+| How complete is the evidence? | ten weighted coverage domains |
+| What depends on what? | reconstructed dependency graph |
+| What blocks a migration, and why? | versioned rule pack, 20 rules |
+| What is simply unknown? | an uncertainty register, never a guess |
+| What work does that imply? | work packages in the eleven scope sections |
+| What does that cost? | the organization's own effort templates |
+| Can this be fixed-priced at all? | a deterministic gate that says why not |
+
+## Requirements
+
+- **Rust 1.98+** for the analysis engine
+- **Node 22+** for the API and the console
+- **PostgreSQL 17** (`infra/docker-compose.yml` brings one up)
+- **Python 3.12+** for the golden generator and the end-to-end run
+- **clamd**, optional but recommended — without it, uploads are refused by
+  analysis rather than quietly accepted
+
+## Install
 
 ```bash
-cargo run -- --request golden/opportunities/GO-001-PKG-LINE-04/request.json
+docker compose -f infra/docker-compose.yml up -d
+cargo build --release
+npm --prefix services/api ci && npm --prefix services/api run migrate && npm --prefix services/api run build
+node services/api/dist/seed.js
 ```
 
-```bash
-cargo test
+Then, from `services/api`, `node dist/main.js`, and `npm --prefix apps/web run
+dev`. API on `127.0.0.1:3000/api`, console on `localhost:3100`. The seed creates
+one user per role in the `Northstar Integrators` tenant, password
+`controlshift-dev`.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `scripts/verify.sh` | every layer, one verdict — **run this before every commit** |
+| `scripts/e2e_go001.py` | GO-001 through the running product, 73 assertions |
+| `scripts/gen_go001.py` | regenerates the golden, asserting MASTER SPEC 57/58/59 |
+| `scripts/conform.py <file>` | how much of a real export the grammar reads |
+| `scripts/validate_export.py <file>` | the three questions a real `.SLC` settles |
+| `scripts/smoke_scanner.sh` | proves the scanner flags EICAR and passes a clean rung |
+| `cargo run -- --request <request.json>` | the engine alone, JSON in, JSON out |
+
+## The rule that governs everything: UNKNOWN stays UNKNOWN
+
+Missing evidence never becomes PASS, compatible, complete, safe or not
+applicable. No safety PLC in the supplied files does not mean safety is out of
+scope; it means **safety is insufficiently evidenced**, and that is what the
+system says.
+
+Everything else follows from it:
+
+- **No PASS findings exist in V1.** A rule that fires produces CONDITIONAL,
+  REVIEW_REQUIRED, UNKNOWN or BLOCKED. A test enforces it on every golden case.
+- **A source the parser cannot read is BLOCKED, never quiet.** Rungs survive an
+  unrecognised header; `PARSE-001` fires when zero rungs come back. Otherwise a
+  foreign format would produce an empty model and an assessment that reads as
+  "nothing wrong".
+- **The scanner fails closed.** Unreachable daemon, timeout, protocol garbage —
+  every path returns UNAVAILABLE, never CLEAN.
+- **An extension never decides a type that moves the verdict.** A `.pdf` lands
+  unclassified until a person says which drawing it is.
+- **The BOM is stamped CANDIDATE — NOT RELEASED FOR PROCUREMENT**, in the
+  console and in every report.
+- **AI is absent.** Not optional-and-unused: there is no model in any path.
+  Coverage percentages, findings, hours and readiness are arithmetic.
+
+## The golden opportunity
+
+`GO-001 — PKG-LINE-04` is the acceptance case, and it is deliberately a mess: a
+1747-L553 in a ten-slot chassis, 21 program files, 684 rungs, 4,231
+instructions, a 1747-SDN scanner, and **no HMI backup, no drive parameters, no
+DeviceNet configuration, drawings that predate a rebuild**.
+
+It must conclude:
+
+```
+FIXED PRICE          NOT READY
+BUDGETARY            READY WITH ALLOWANCES
+TIME AND MATERIAL    READY
 ```
 
-Adding a golden case is adding two files - `source.SLC` and `case.json` - under
-`golden/atomic/` or `golden/composite/`. No Rust change. The suite refuses a rule
-with no positive and negative fixture, and refuses a case that asserts nothing.
+and it must reach that conclusion for stated reasons — two critical unknowns,
+two blocking findings, 54% weighted coverage. Confirming the two human
+determinations closes exactly two of the five refusal reasons and **fixed price
+stays refused**; a composite case proves the gate can reach READY, so the
+NOT_READY is a result rather than a constant.
 
-```bash
-python scripts/e2e_go001.py
+The suites fail if ControlShift misses either IIM, marks a PID verified, invents
+HMI effort, assumes safety is absent, or treats an OEM catalog mapping as a
+field-compatibility guarantee.
+
+## Architecture
+
+```
+engines/analysis/          Rust. Lexer -> parser -> IR -> dependency graph -> rules
+  src/lexer.rs             line tokenizer with columns, for diagnostics
+  src/parser.rs            SLC ASCII; never panics, diagnoses instead
+  src/ir.rs                Control IR; vendor opcode preserved beside the normalized one
+  src/engine.rs            coverage, rules, paths, work packages, BOM, readiness
+  src/model.rs             the versioned request/result contract
+
+rulepacks/rockwell/        20 rules, coverage domains, I/O mapping, scope sections
+golden/                    19 atomic cases, 4 composite, and GO-001
+services/api/              NestJS + Fastify + Prisma. Tenancy, intake, review, reports
+apps/web/                  Next.js console, sixteen modules
+scripts/                   verification, golden generation, format conformance
+docs/                      the input grammar, customer intake, scanner setup
 ```
 
-runs GO-001 through the **running product**: an opportunity created over HTTP,
-ten artifacts uploaded through the real ingestion pipeline and scanned by
-whatever clamd the API points at, analysis, review, commercial propositions,
-estimate, all three deliverables and the audit trail. 66 assertions, nothing
-mocked and nothing inserted behind the API's back. The Rust suite proves the
-engine; this proves the product.
+The engine is a separate process with a versioned JSON contract. It reads only
+the artifacts a request names, and Rust internals never leak into what the
+application stores.
 
-The GO-001 acceptance suite covers every mandatory finding of SPEC 60, the three migration paths of SPEC 61, the commercial decision of
-SPEC 62, and one test per failure condition of SPEC 63. A false-safe result
-fails the suite.
+## Rule packs
 
-## The readiness gate is real, not hardcoded
+Rules are versioned data, not code. A rule names a compiled predicate, its
+category, state, severity, the work packages it raises, the unit it counts in,
+and the OEM publication behind it:
 
-`engineering_review_complete` and `shutdown_feasible` are human determinations the
-engine cannot make. They arrive as request fields and default to **false** - absent
-means not established, never assumed true. `G2-002` proves the gate reaches
-FIXED_PRICE READY when they are declared and the evidence is complete; `G2-003` is
-the same system with review incomplete and must not. Without that pair, the
-NOT_READY of GO-001 would prove nothing.
+```json
+{
+  "id": "SW-003",
+  "predicate": "opcode_count",
+  "args": { "opcode": "IIM" },
+  "state": "BLOCKED",
+  "unit_type": "INSTRUCTION",
+  "title": "IIM instances require manual rewrite",
+  "work_packages": ["UNSUPPORTED_INSTRUCTION_REWRITE", "PLC_PROGRAM_REVIEW", "FAT"],
+  "evidence": [{ "source_type": "OEM", "publication_id": "1756-RM085" }]
+}
+```
 
-## Estimating and deliverables
+Every assessment records the pack that produced it. Re-analysis writes a new
+row; an earlier assessment is never erased or rewritten.
+
+A test refuses a rule with no positive **and** negative fixture, and refuses a
+golden case that asserts nothing.
+
+## Estimating and scope
 
 Hours come from the organization's own effort templates, keyed by **(work
-package, unit)**. Nothing else produces an hour figure — there is no model in
-that path and no default ControlShift claims as universal.
+package, unit)**. ControlShift claims no universal engineering-hour values.
 
-- A work package with no template is reported **NOT PRICED** and excluded from
-  the range, never silently valued at zero. `DISCOVERY` is deliberately
-  template-less: its size is exactly what is unknown.
-- Unknowns never become hours. They become a disclosed allowance decision.
-- The three deliverables of SPEC 38 render from the stored `AnalysisResult`:
-  Engineering Preflight, Proposal Input Package, Customer Information Request.
-  Each scope line in the proposal package traces back
-  `work package ← finding ← rule ← evidence`, and each document is written once
-  to `storage/reports/` with its SHA-256; regenerating creates a new row.
+A work package with no template is reported **NOT PRICED** and excluded from the
+range — never valued at zero. `DISCOVERY` is deliberately template-less: its
+size is exactly what is unknown.
 
-## What the console can drive
-
-The whole workflow, without curl: create an opportunity, upload artifacts, run
-the analysis, review each finding, record the two human determinations,
-propose and approve assumptions and exclusions, read the estimate, and generate
-the three deliverables. Effort templates are editable under `/admin` by an
-estimator or admin.
-
-Two things the console deliberately makes visible rather than smoothing over:
-
-- **Confirming the human determinations does not buy readiness.** On GO-001 it
-  removes two of the five refusal reasons; the blockers, the critical unknowns
-  and the 54% coverage remain, and fixed price stays NOT READY.
-- **A verdict computed before the latest change is marked stale.** The stored
-  analysis is never rewritten (SPEC 24), so the console compares the
-  determinations recorded on the analysis against the ones in force now and
-  asks for a re-analysis instead of silently showing an old answer.
-
-## System Explorer
-
-Browse the reconstructed program: 21 files with their rung and instruction
-counts, the findings resting on each, and the STI marked where it lives. Open
-one and filter its rungs — `IIM` on LAD8 lands on the single rung that blocks
-the migration, at its line in the artifact:
-
-```
-rung 9   line 254   SOR IIM I:2.0 1 EOR
-                    IIM - no equivalent in the target I/O model    SW-003
-```
-
-**Rungs are shown as written, not rebuilt.** Branch tokens are structural and
-are not stored as instructions, so a rung reassembled from the instruction list
-alone would render `BST XIC A NXB XIC B BND` as three contacts in series —
-different logic, shown confidently. The IR now keeps each rung's source line
-(IR schema 1.1.0) and the explorer prints that.
-
-An assessment produced before 1.1.0 has no source line. Stored analyses are
-never rewritten, so the explorer falls back to the rebuilt form and says so in
-as many words rather than crashing or pretending.
-
-## Scope Builder
-
-Scope is organised into the eleven sections of SPEC 28, and every line answers
-*why is this in scope?* with the chain the spec asks for:
+Scope is organised into the eleven proposal sections, and every line answers
+*why is this in scope?*:
 
 ```
 unsupported instruction rewrite   2 instruction
@@ -125,177 +189,106 @@ unsupported instruction rewrite   2 instruction
   <- RA-2026.08::SW-003 <- STRUCTURED_PARSE; 1756-RM085
 ```
 
-Two sections read **"nothing scoped here"** on GO-001: HMI and Drives. That is
-the product working. Unevidenced scope generates discovery, never delivery, and
-printing the empty section says so — leaving it out would read as an oversight
-rather than a decision.
+On GO-001, HMI and Drives read **"nothing scoped here"**. Unevidenced scope
+generates discovery, never delivery, and the empty section is printed rather
+than omitted: leaving it out would read as an oversight instead of a decision.
 
-The section map lives in the rule pack, so it is versioned with the rules. A
-Rust test fails if any work package a rule can raise has no section: it would
-still be raised, still be priced, and then be missing from the proposal.
+## Deliverables
 
-## Dependency graph
+Three documents, rendered from the stored result with the integrator's
+branding: an **Engineering Preflight**, a **Proposal Input Package** and a
+**Customer Information Request**. Each is written once to `storage/reports/`
+with its SHA-256; regenerating creates a new document rather than changing one
+that was already sent.
 
-Drawn as impact propagation, not as a hairball. 488 edges rendered at once tell
-an engineer nothing; the chain that matters is the one SPEC 22 names:
+An exclusion nobody approved prints under `Proposed exclusions — NOT APPROVED`,
+and the scope above still carries it.
 
-```
-slot 8 1747-SDN  --scans-->  DeviceNet  --nodes-->  UNDETERMINED
-                 UNDETERMINED  <-- 8 MSG instructions target it
-```
+## Traps this project already hit
 
-The eight MSG instructions hang off a **separate, undetermined** network node
-rather than off DeviceNet, because nothing in the evidence says which network
-they route over. Attaching them to DeviceNet would draw a route nobody
-established.
+Each of these was a real defect, found and fixed. They are the reason several
+tests exist.
 
-Selecting a module shows what rests on it — `slot 6 - 1746-NI4`: three
-addresses, three program files, finding `IO-003`. A Rust test pins the shared
-namespace that link depends on.
+**A work package summed units that were not the same unit.** Two IIM rewrites
+plus eleven indirect references became one 13-unit line and priced at 26–78 h
+instead of 4–12 h. Packages are now keyed by unit and a test pins the IIM line
+at two instructions.
 
-## Report branding
+**An extension decided an evidence-bearing type.** `NETWORK_SKETCH.pdf` was
+inferred as an electrical drawing; NETWORK coverage went 33% → 0, weighted
+coverage 54% → 47%, and BUDGETARY flipped to NOT READY. Nobody typed anything
+wrong. Found by running the end-to-end flow through the API instead of the seed.
 
-All six configurable elements of SPEC 39: organization name and logo, customer
-name and optional customer logo, report footer, and a prepared-by line under
-the preparer's own name. Set under `/admin` by an org admin; the customer logo
-is per opportunity.
+**The seed wrote rows straight to Postgres.** It walked around seven intake
+controls and forced `SCANNED` on files no scanner had seen, so every suite built
+on it passed over data no user could produce. The seed now calls the same
+services the HTTP layer calls.
 
-The logo lands in an `<img src>` inside a document somebody forwards by email,
-so the scheme is validated rather than trusted: base64 `data:` URIs of PNG,
-JPEG, GIF or WEBP, capped at 256 kB. **SVG is refused** — it is a document
-format that can carry script. The cover prints the preparer's name, never their
-login.
+**A foreign header silently deleted the program.** Rungs were dropped, the model
+came back empty, and no software finding fired — including the two IIM. Rungs
+now survive an unreadable header and `PARSE-001` blocks the assessment.
 
-## The suites are mutation-tested, not just green
+**The golden was not byte-reproducible, and its docstring said it was.**
+openpyxl stamps the time into the workbook and into the zip headers, so the
+fixture changed on every run. Publishing the repository is what surfaced it.
 
-Green proves nothing on its own. Each invariant that matters was broken on
-purpose and the suite had to notice:
+**CORS refused PATCH.** Validating an assumption and approving an exclusion were
+impossible from a browser while every server-side test passed — the suites never
+issue a preflight.
 
-| Invariant broken | Result |
-|---|---|
-| Analysis stops checking the scanning gate | `uploads` 1 failure |
-| Tenant scope stops filtering | `tenancy` 1 failure |
-| Logo validation returns everything unchanged | `branding` 2 failures |
-| Proposing also approves the exclusion | `commercial` 4 failures |
-| `SW-003` downgraded to PASS | GO-001 2 failures |
-| `evidence_absent` never fires | GO-001 6 failures |
-| `module_present` silenced | `G1-009`, `G2-001` fail by name |
+**Rungs cannot be rebuilt from the IR.** Branch tokens are structural and are
+not stored as instructions, so `BST XIC A NXB XIC B BND` would render as three
+contacts in series. Different logic, shown confidently. The IR now keeps each
+rung's source line.
 
-## The seed uses the product, not the database
+## Known limitations
 
-An earlier seed wrote artifact rows straight to Postgres. That walked around
-seven intake controls at once — the extension allowlist, the refused
-extensions, the guidance for a `.RSS`, the empty-file check, the size ceiling,
-the write-once object store and the audit trail — and forced
-`processingStatus: SCANNED` on files no scanner had ever seen. Every suite
-built on that seed was passing over data no user could have produced.
-
-The seed now boots a Nest application context and calls `ArtifactsService` and
-`BrandingService`, the same objects the HTTP layer calls. It inherits every
-control automatically and cannot drift from them. A fresh seed against a live
-scanner produces ten really-scanned artifacts and eleven audit events that did
-not exist before.
-
-If no scanner is running the seeded artifacts land `RECEIVED` and analysis
-refuses them — and the seed says so instead of papering over it.
-
-## Application-layer boundaries
-
-- **Tenancy and RBAC are tested, not asserted.** `services/api/src/tenancy.test.ts`
-  boots the real app against the real database and proves a foreign tenant gets
-  404 (never 403 - a wrong tenant must not learn a row exists), a Viewer gets
-  403, and a forged token gets 401.
-- **Originals are content-addressed and write-once.** Uploads land under
-  `storage/original/<tenant>/<sha>` with `flag: 'wx'`. Re-analysis writes a new
-  `Analysis` row; no assessment is ever overwritten.
-- **An exclusion is not an exclusion until commerce approves it.** Proposals
-  appear in the Proposal Input Package under `Proposed exclusions - NOT
-  APPROVED`, and the scope above still carries them. Engineering validates
-  assumptions, commerce approves exclusions, and neither role can perform the
-  other's act (SPEC 37).
-- **Propose from analysis drafts; it never approves.** It refuses to touch a
-  `RESOLVE_BEFORE_QUOTE` unknown at all: that cannot be assumed away or excluded
-  into safety, only answered.
-- **Reviews sit beside findings, never on top of them.** An override records
-  reviewer, reason and timestamp; the original finding stays in the stored
-  `AnalysisResult`.
-- **Malware scanning speaks clamd's INSTREAM protocol directly** — no
-  dependency, and no third-party service: a customer's PLC source must not
-  leave the deployment (SPEC 42), so an upload-to-cloud scanner is not an
-  option. Point `CLAMD_HOST` at the `clamav` service in
-  `infra/docker-compose.yml`.
-- **The scanner fails closed.** Unreachable daemon, timeout, protocol garbage,
-  size limit — every failure path returns UNAVAILABLE, never CLEAN. With no
-  scanner configured, uploads stay `RECEIVED`, analysis refuses them, and the
-  API says so at startup. `ALLOW_UNSCANNED_ARTIFACTS=true` overrides that for
-  development only.
-- **Infected bytes never reach the object store.** The scan runs before
-  anything is written, so a rejection leaves nothing to clean up. The upload
-  returns 400 with the signature and the rejection is audited.
-
-Verified against a real ClamAV 1.5.3 with current signatures, not only against
-the protocol stub:
-
-```
-POST /artifacts (EICAR)  ->  400 "rejected by malware scanning: Eicar-Test-Signature"
-audit                    ->  artifact.rejected, signature recorded
-artifact row             ->  none
-object store             ->  nothing written
-POST /artifacts (clean)  ->  201, processingStatus SCANNED
-```
-
-`scripts/smoke_scanner.sh` re-proves that against whatever clamd `CLAMD_HOST`
-points at. See `docs/scanner-setup.md` for the two ways to get one running.
-- **Intake refuses rather than inspects.** Archives and executables are rejected
-  by extension; nothing is unpacked, so there is no archive bomb to bound.
-- **An extension never decides a type that moves the verdict.** A `.pdf` lands
-  as unclassified, contributing no evidence, until somebody says which drawing
-  it is. Inferring ELECTRICAL_DRAWING from a network sketch dropped NETWORK
-  coverage from 33% to 0, weighted coverage from 54% to 47%, and flipped
-  BUDGETARY from READY WITH ALLOWANCES to NOT READY — with nobody typing
-  anything wrong. The end-to-end run found that.
+- **The input grammar is half-validated.** The rung layer — `SOR … EOR`,
+  `BST/NXB/BND`, the operand spellings — is confirmed against public sources and
+  against 143 operands lifted from three real RSLogix projects. **Every header
+  keyword is ours**, and the A.B. 6200 record structure is not published;
+  Rockwell releases it under NDA. See `docs/slc-ascii-format.md` §1.
+- **The rack may not be in the program export at all.** A migration vendor's
+  intake takes I/O configuration from a printed report. If that is right, the
+  evidence behind most of GO-001's findings moves, and V1 needs a report parser.
+  `scripts/validate_export.py` settles it the day a real export arrives.
+- **The golden is synthetic.** It hits the specification's counts exactly; it
+  does not contain the rarities a twenty-year-old project will.
+- **No PDF or photo extraction.** Evidence that exists only inside a drawing is
+  reported as missing. That is correct V1 behaviour, not a gap to paper over.
+- **Rule predicates are a closed compiled registry**, not an expression DSL. New
+  *kinds* of check need an engine release.
+- **Analysis is synchronous.** Durable orchestration is not wired; GO-001
+  analyses in well under a second, so there is nothing to orchestrate yet.
+- **One migration family**: SLC 500 → CompactLogix 5380. No PLC-5, MicroLogix,
+  Siemens, Schneider or ABB, and no automatic code conversion.
 
 ## Verifying a change
-
-There is **no CI**. This repository has no remote and no Actions runner, so
-nothing checks a commit but the machine it was written on:
 
 ```bash
 scripts/verify.sh
 ```
 
-Engine, API, console, the end-to-end run and the scanner, with one verdict at
-the end. It refuses to report green when a suite reports suspiciously few
-tests — a run that executed nothing must not look like a run that passed.
-`.github/workflows/ci.yml` exists for the day this is published; it has never
-run.
+Engine, golden reproducibility, API against the real database, console
+typecheck and production build, the end-to-end product run, and the scanner —
+one verdict. It refuses to report green when a suite reports suspiciously few
+tests: a run that executed nothing must not look like a run that passed.
 
-## Running on Windows
+On Windows, Smart App Control blocks freshly built Rust **test** binaries; the
+script runs them in WSL. See `docs/windows-notes.md`.
 
-Smart App Control, when enforced, blocks freshly built Rust **test** binaries
-with `os error 4551`. The product is unaffected — the release binary keeps its
-reputation, so the API, the console and the end-to-end script all run — but
-`cargo test` may refuse to execute locally. Run it in WSL instead — same
-toolchain, same result — with the exact commands in `docs/windows-notes.md`,
-which also covers the Docker engine and two smaller traps.
+## Status
 
-## Known ceilings
+V1 in progress. The engine, the application layer and the console are complete
+against the specification's module list and definition of done; GO-001 runs end
+to end through the product, scanned by a live ClamAV, in under three seconds.
 
-- Input is the **RSLogix 500 ASCII export**, not the binary `.SLC`. See
-  `docs/slc-ascii-format.md` — the grammar is assumed and must be verified
-  against a real customer export before the first pilot.
-- A source the parser cannot read is BLOCKED, never quiet. Rungs survive an
-  unrecognised header (`G1-017`), and `PARSE-001` fires when zero rungs come
-  back or errors exceed 10% of them — otherwise a foreign header would produce
-  an empty model and an assessment that reads as "nothing wrong".
-- The golden is synthetic. It hits the SPEC 59 counts exactly; it does not
-  contain the rarities a real 20-year-old project will.
-- Rule predicates are a closed compiled registry, not an expression DSL.
-  Rules stay versioned data; new *kinds* of check need an engine release.
-- Analysis runs synchronously in the API process. Temporal (SPEC 49) is not
-  wired; GO-001 analyzes in well under a second, so there is nothing to
-  orchestrate yet.
-- No reports (SPEC 38) and no estimating templates (SPEC 32) yet. The engine
-  emits work packages with quantities; nobody has priced them.
-- No PDF/photo extraction. Evidence that exists only inside a drawing is
-  reported as missing, which is the correct V1 behaviour, not a gap to paper over.
+What it has not done yet is read a **real** customer export. Until one does,
+the input grammar stays marked PARTIALLY VALIDATED, and every number downstream
+of the parser inherits that caveat.
+
+No semantic versioning, no compatibility promise, no releases.
+
+## License
+
+Not yet licensed. All rights reserved until a license is chosen.
