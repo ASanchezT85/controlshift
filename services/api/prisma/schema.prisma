@@ -1,0 +1,216 @@
+// ControlShift application persistence (MASTER SPEC 10/11/13/25/51/53).
+//
+// Every business entity is tenant-scoped (SPEC 51). Original artifacts and
+// audit events are never mutated by application workflows (SPEC 11/53).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  users         User[]
+  opportunities Opportunity[]
+  auditEvents   AuditEvent[]
+}
+
+enum Role {
+  ORG_ADMIN
+  CONTROLS_ENGINEER
+  ESTIMATOR
+  PROJECT_MANAGER
+  VIEWER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  tenantId     String
+  email        String
+  name         String
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+enum OpportunityStatus {
+  DRAFT
+  ANALYZING
+  ANALYZED
+  ENGINEERING_REVIEW
+  COMMERCIAL_REVIEW
+  CLOSED
+}
+
+enum ProposalType {
+  ROM
+  BUDGETARY
+  FIXED_PRICE
+  TIME_AND_MATERIAL
+  DISCOVERY_ONLY
+}
+
+model Opportunity {
+  id       String @id @default(uuid())
+  tenantId String
+
+  name         String
+  customerName String
+  facilityName String
+
+  sourcePlatform  String       @default("SLC500")
+  requestedTarget String       @default("CompactLogix 5380")
+  proposalType    ProposalType
+  proposalDeadline DateTime?
+
+  shutdownRequirementHours Float?
+  commercialNotes          String?
+
+  // Human determinations that feed the SPEC 35 gate. False until a person
+  // says otherwise - the engine never assumes them.
+  engineeringReviewComplete Boolean @default(false)
+  shutdownFeasible          Boolean @default(false)
+
+  status    OpportunityStatus @default(DRAFT)
+  createdBy String
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  artifacts Artifact[]
+  analyses  Analysis[]
+
+  @@index([tenantId, status])
+}
+
+enum ArtifactType {
+  PLC_SOURCE
+  SYMBOL_DATABASE
+  IO_LIST
+  ELECTRICAL_DRAWING
+  NETWORK_DRAWING
+  HMI_PROJECT
+  DRIVE_BACKUP
+  PHOTO
+  SPREADSHEET
+  CUSTOMER_NOTE
+  MIGRATION_REPORT
+  OTHER
+}
+
+enum ProcessingStatus {
+  RECEIVED
+  SCANNED
+  PARSED
+  REJECTED
+}
+
+model Artifact {
+  id            String @id @default(uuid())
+  opportunityId String
+
+  originalFilename String
+  mediaType        String
+  artifactType     ArtifactType
+
+  sha256 String
+  size   Int
+
+  processingStatus ProcessingStatus @default(RECEIVED)
+  rejectionReason  String?
+
+  /// Content-addressed location under storage/original/. Immutable (SPEC 11).
+  storageLocation String
+
+  createdAt DateTime @default(now())
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, sha256])
+  @@index([opportunityId])
+}
+
+model Analysis {
+  id            String @id @default(uuid())
+  opportunityId String
+
+  // Every assessment records exactly what produced it (SPEC 24/70).
+  schemaVersion        String
+  parserVersion        String
+  irSchemaVersion      String
+  analysisEngineVersion String
+  rulePackVersion      String
+
+  targetStrategy String
+
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  failed     Boolean   @default(false)
+  failure    String?
+
+  /// The engine's AnalysisResult verbatim. Re-analysis creates a NEW row; an
+  /// earlier assessment is never erased (SPEC 24).
+  result Json?
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  reviews     FindingReview[]
+
+  @@index([opportunityId, startedAt])
+}
+
+enum ReviewAction {
+  ACKNOWLEDGE
+  ACCEPT
+  REJECT
+  RESOLVE
+  OVERRIDE
+}
+
+/// Engineer decisions layered ON TOP of findings. The original finding lives
+/// in Analysis.result and is never rewritten (SPEC 36).
+model FindingReview {
+  id         String @id @default(uuid())
+  analysisId String
+  findingId  String
+
+  action      ReviewAction
+  reason      String?
+  overrideState String?
+
+  reviewerId String
+  createdAt  DateTime @default(now())
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId, findingId])
+}
+
+/// Append-only (SPEC 53). No update or delete path exists in the application.
+model AuditEvent {
+  id       String @id @default(uuid())
+  tenantId String
+
+  actorId    String?
+  action     String
+  subjectType String
+  subjectId  String
+  detail     Json?
+
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+}

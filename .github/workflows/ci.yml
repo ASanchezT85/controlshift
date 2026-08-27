@@ -26,3 +26,44 @@ jobs:
       # The golden must be reproducible byte-for-byte from its generator.
       - run: python scripts/gen_go001.py
       - run: git diff --exit-code -- golden/
+
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: controlshift
+          POSTGRES_PASSWORD: controlshift
+          POSTGRES_DB: controlshift
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U controlshift"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://controlshift:controlshift@127.0.0.1:5432/controlshift?schema=public
+      JWT_SECRET: ci-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The API shells out to the engine, so the binary has to exist first.
+      - run: cargo build --release
+      - run: npm ci --prefix services/api
+      - run: npx --prefix services/api prisma migrate deploy --schema services/api/prisma/schema.prisma
+      - run: npx --prefix services/api prisma generate --schema services/api/prisma/schema.prisma
+      - run: npm run build --prefix services/api
+      # Tenant isolation and RBAC are security boundaries: they gate merge.
+      - run: node --test services/api/dist/tenancy.test.js
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefix apps/web
+      - run: npm run build --prefix apps/web

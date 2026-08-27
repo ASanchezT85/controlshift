@@ -48,6 +48,23 @@ FIXED_PRICE READY when they are declared and the evidence is complete; `G2-003` 
 the same system with review incomplete and must not. Without that pair, the
 NOT_READY of GO-001 would prove nothing.
 
+## Application-layer boundaries
+
+- **Tenancy and RBAC are tested, not asserted.** `services/api/src/tenancy.test.ts`
+  boots the real app against the real database and proves a foreign tenant gets
+  404 (never 403 - a wrong tenant must not learn a row exists), a Viewer gets
+  403, and a forged token gets 401.
+- **Originals are content-addressed and write-once.** Uploads land under
+  `storage/original/<tenant>/<sha>` with `flag: 'wx'`. Re-analysis writes a new
+  `Analysis` row; no assessment is ever overwritten.
+- **Reviews sit beside findings, never on top of them.** An override records
+  reviewer, reason and timestamp; the original finding stays in the stored
+  `AnalysisResult`.
+- **Malware scanning is not wired.** Uploaded artifacts stay `RECEIVED` and
+  analysis refuses to consume them until a scanner marks them `SCANNED`, or an
+  operator sets `ALLOW_UNSCANNED_ARTIFACTS=true` in a dev environment. The
+  refusal is real: it is the default.
+
 ## Known ceilings
 
 - Input is the **RSLogix 500 ASCII export**, not the binary `.SLC`. See
@@ -57,5 +74,10 @@ NOT_READY of GO-001 would prove nothing.
   contain the rarities a real 20-year-old project will.
 - Rule predicates are a closed compiled registry, not an expression DSL.
   Rules stay versioned data; new *kinds* of check need an engine release.
+- Analysis runs synchronously in the API process. Temporal (SPEC 49) is not
+  wired; GO-001 analyzes in well under a second, so there is nothing to
+  orchestrate yet.
+- No reports (SPEC 38) and no estimating templates (SPEC 32) yet. The engine
+  emits work packages with quantities; nobody has priced them.
 - No PDF/photo extraction. Evidence that exists only inside a drawing is
   reported as missing, which is the correct V1 behaviour, not a gap to paper over.
