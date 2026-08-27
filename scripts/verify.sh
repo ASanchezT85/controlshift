@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Everything, in one command. This repository has no CI: there is no remote and
-# no Actions runner, so this script is the only thing standing between a change
-# and a regression. Run it before every commit.
+# Everything, in one command. There is no hosted CI on this project, so this
+# script is the only thing standing between a change and a regression. Run it
+# before every commit.
 #
 #   scripts/verify.sh              full run
 #   scripts/verify.sh --fast       skip the web production build

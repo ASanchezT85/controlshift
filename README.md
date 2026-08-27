@@ -266,6 +266,9 @@ rung's source line.
 
 ## Verifying a change
 
+There is no hosted CI. Nothing checks a commit but the machine it was written
+on, so this is not optional:
+
 ```bash
 scripts/verify.sh
 ```

@@ -1,8 +1,8 @@
 # Running this on Windows
 
 Two machine-level policies bit repeatedly during development. Neither is a
-defect in this repository and neither exists on the Linux CI runners, but both
-look like build failures until you know what they are.
+defect in this repository, but both look like build failures until you know
+what they are.
 
 ## Smart App Control blocks freshly built test binaries
 
@@ -39,13 +39,11 @@ artifacts intact, and it moves the build off the 9p mount, which is slow.
 Same toolchain version, same result: 34 tests pass, `cargo fmt --check` clean,
 `cargo clippy -D warnings` clean.
 
-Other options:
-
-- **CI**, where the policy does not apply.
-- Or turn Smart App Control off in Windows Security → App & browser control.
-  That is a real reduction in the machine's security posture and it cannot be
-  turned back on without reinstalling Windows, so it is a decision for whoever
-  owns the machine, not something to do casually to get a green build.
+The other option is to turn Smart App Control off, in Windows Security → App &
+browser control. That is a real reduction in the machine's security posture and
+it cannot be turned back on without reinstalling Windows, so it is a decision
+for whoever owns the machine, not something to do casually to get a green
+build.
 
 The product itself is unaffected: the release binary runs, so the API, the
 console and `scripts/e2e_go001.py` all work.
