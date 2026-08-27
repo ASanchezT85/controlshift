@@ -60,6 +60,8 @@ jobs:
       # Estimating and the three deliverables. Pins the IIM rewrite at two
       # instructions and fails if starter templates drift from the rule pack.
       - run: node --test services/api/dist/estimating.test.js
+      # Artifact intake: the scanning gate must block analysis by default.
+      - run: node --test services/api/dist/uploads.test.js
 
   web:
     runs-on: ubuntu-latest

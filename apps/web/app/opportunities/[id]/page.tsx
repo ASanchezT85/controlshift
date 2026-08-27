@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { use, useCallback, useEffect, useState } from 'react';
 import { api, sessionUser, token } from '@/lib/api';
+import ArtifactsCard from './ArtifactsCard';
 
 const API = process.env.NEXT_PUBLIC_API ?? 'http://127.0.0.1:3000/api';
 
@@ -107,7 +108,13 @@ interface Opportunity {
   shutdownRequirementHours: number | null;
   engineeringReviewComplete: boolean;
   shutdownFeasible: boolean;
-  artifacts: { id: string; originalFilename: string; artifactType: string; size: number }[];
+  artifacts: {
+    id: string;
+    originalFilename: string;
+    artifactType: string;
+    size: number;
+    processingStatus: string;
+  }[];
 }
 
 export default function OpportunityPage({ params }: { params: Promise<{ id: string }> }) {
@@ -223,6 +230,12 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
         </button>
         {error && <p className="error">{error}</p>}
       </div>
+
+      <ArtifactsCard
+        opportunityId={id}
+        artifacts={opportunity.artifacts}
+        onChange={load}
+      />
 
       {!r && (
         <div className="card">

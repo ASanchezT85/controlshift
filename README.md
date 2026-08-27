@@ -79,7 +79,12 @@ that path and no default ControlShift claims as universal.
 - **Malware scanning is not wired.** Uploaded artifacts stay `RECEIVED` and
   analysis refuses to consume them until a scanner marks them `SCANNED`, or an
   operator sets `ALLOW_UNSCANNED_ARTIFACTS=true` in a dev environment. The
-  refusal is real: it is the default.
+  refusal is real: it is the default, the console shows it on the artifact row,
+  and `uploads.test.ts` fails if an upload is ever marked scanned on arrival.
+- **Intake refuses rather than inspects.** Archives and executables are rejected
+  by extension; nothing is unpacked, so there is no archive bomb to bound. The
+  extension only *suggests* a type - a PDF is an electrical drawing or a network
+  sketch depending on what it actually is, so the uploader can declare it.
 
 ## Known ceilings
 
