@@ -1,3 +1,6 @@
+# NOT RUNNING. This repository has no remote and no Actions runner: this
+# file is here for the day it is published, and nothing executes it today.
+# The verification that actually runs is scripts/verify.sh, on the machine.
 name: CI
 on: [push, pull_request]
 

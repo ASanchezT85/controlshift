@@ -45,8 +45,7 @@ estimate, all three deliverables and the audit trail. 66 assertions, nothing
 mocked and nothing inserted behind the API's back. The Rust suite proves the
 engine; this proves the product.
 
-`cargo test` includes the GO-001 acceptance suite: every mandatory finding of
-SPEC 60, the three migration paths of SPEC 61, the commercial decision of
+The GO-001 acceptance suite covers every mandatory finding of SPEC 60, the three migration paths of SPEC 61, the commercial decision of
 SPEC 62, and one test per failure condition of SPEC 63. A false-safe result
 fails the suite.
 
@@ -255,6 +254,21 @@ points at. See `docs/scanner-setup.md` for the two ways to get one running.
   coverage from 33% to 0, weighted coverage from 54% to 47%, and flipped
   BUDGETARY from READY WITH ALLOWANCES to NOT READY — with nobody typing
   anything wrong. The end-to-end run found that.
+
+## Verifying a change
+
+There is **no CI**. This repository has no remote and no Actions runner, so
+nothing checks a commit but the machine it was written on:
+
+```bash
+scripts/verify.sh
+```
+
+Engine, API, console, the end-to-end run and the scanner, with one verdict at
+the end. It refuses to report green when a suite reports suspiciously few
+tests — a run that executed nothing must not look like a run that passed.
+`.github/workflows/ci.yml` exists for the day this is published; it has never
+run.
 
 ## Running on Windows
 
