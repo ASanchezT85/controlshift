@@ -47,7 +47,13 @@ const TITLES: Record<ReportKind, string> = {
 
 interface Ctx {
   kind: ReportKind;
-  tenant: { name: string; brandName: string | null; brandLogo: string | null; reportFooter: string | null };
+  tenant: {
+    name: string;
+    brandName: string | null;
+    brandLogo: string | null;
+    reportFooter: string | null;
+    preparedByLine: string | null;
+  };
   opportunity: {
     name: string;
     customerName: string;
@@ -56,6 +62,7 @@ interface Ctx {
     shutdownRequirementHours: number | null;
     requestedTarget: string;
     engineeringReviewComplete: boolean;
+    customerLogo: string | null;
   };
   analysis: { id: string; rulePackVersion: string; analysisEngineVersion: string; startedAt: Date };
   result: any;
@@ -91,6 +98,7 @@ function shell(ctx: Ctx, body: string): string {
   header.cover { border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:28px;
                  display:flex; gap:20px; align-items:flex-start }
   header.cover img { max-height:56px; max-width:200px }
+  header.cover img.customer { margin-left:auto }
   h1 { font-size:22px; margin:0 0 6px }
   h2 { font-size:13px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted);
        border-bottom:1px solid var(--line); padding-bottom:6px; margin:32px 0 12px }
@@ -109,12 +117,16 @@ function shell(ctx: Ctx, body: string): string {
   @media print { body { padding:0 } h2 { break-after:avoid } tr { break-inside:avoid } }
 </style></head><body>
 <header class="cover">
-  ${ctx.tenant.brandLogo ? `<img src="${esc(ctx.tenant.brandLogo)}" alt="">` : ''}
+  ${ctx.tenant.brandLogo ? `<img src="${esc(ctx.tenant.brandLogo)}" alt="${esc(brand)}">` : ''}
   <div>
     <h1>${esc(TITLES[ctx.kind])}</h1>
     <div>${esc(ctx.opportunity.name)} — ${esc(ctx.opportunity.customerName)}, ${esc(ctx.opportunity.facilityName)}</div>
     <div class="muted">Prepared by ${esc(brand)} · ${esc(ctx.generatedByName)} · ${esc(ctx.generatedAt)}</div>
+    ${ctx.tenant.preparedByLine ? `<div class="muted">${esc(ctx.tenant.preparedByLine)}</div>` : ''}
   </div>
+  ${ctx.opportunity.customerLogo
+      ? `<img class="customer" src="${esc(ctx.opportunity.customerLogo)}" alt="${esc(ctx.opportunity.customerName)}">`
+      : ''}
 </header>
 ${body}
 <footer>
@@ -432,6 +444,7 @@ export class ReportsService {
     if (!analysis?.result) throw new NotFoundException('this opportunity has no completed analysis');
 
     const tenant = await this.prisma.tenant.findFirstOrThrow({ where: { id: user.tenantId } });
+    const preparer = await this.prisma.user.findFirst({ where: { id: user.userId } });
     const estimate =
       kind === 'PROPOSAL_INPUT_PACKAGE'
         ? await this.estimating.estimate(user.tenantId, opportunityId).catch(() => null)
@@ -448,7 +461,7 @@ export class ReportsService {
       estimate,
       assumptions,
       exclusions,
-      generatedByName: user.email,
+      generatedByName: preparer?.name ?? user.email,
       generatedAt: new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
     });
 

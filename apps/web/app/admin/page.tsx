@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { api, sessionUser } from '@/lib/api';
+import BrandingCard from './BrandingCard';
 
 interface Template {
   id: string;
@@ -102,6 +103,8 @@ export default function AdminPage() {
             : 'Rates are read-only for your role; an estimator or admin owns them.'}
         </p>
       </div>
+
+      <BrandingCard role={role} />
 
       <div className="card">
         <h2>Effort templates</h2>

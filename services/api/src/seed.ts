@@ -43,6 +43,7 @@ async function main() {
     where: { id: tenant.id },
     data: {
       brandName: 'Northstar Integrators',
+      preparedByLine: 'Controls Engineering - P.Eng. 41208',
       reportFooter:
         'Northstar Integrators - preflight assessment - not for construction or procurement',
     },

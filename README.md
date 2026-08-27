@@ -82,6 +82,19 @@ Two things the console deliberately makes visible rather than smoothing over:
   determinations recorded on the analysis against the ones in force now and
   asks for a re-analysis instead of silently showing an old answer.
 
+## Report branding
+
+All six configurable elements of SPEC 39: organization name and logo, customer
+name and optional customer logo, report footer, and a prepared-by line under
+the preparer's own name. Set under `/admin` by an org admin; the customer logo
+is per opportunity.
+
+The logo lands in an `<img src>` inside a document somebody forwards by email,
+so the scheme is validated rather than trusted: base64 `data:` URIs of PNG,
+JPEG, GIF or WEBP, capped at 256 kB. **SVG is refused** — it is a document
+format that can carry script. The cover prints the preparer's name, never their
+login.
+
 ## Application-layer boundaries
 
 - **Tenancy and RBAC are tested, not asserted.** `services/api/src/tenancy.test.ts`

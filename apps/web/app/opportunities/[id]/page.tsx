@@ -6,6 +6,7 @@ import { api, sessionUser, token } from '@/lib/api';
 import ArtifactsCard from './ArtifactsCard';
 import CommercialCard, { type Assumption, type Exclusion } from './CommercialCard';
 import FindingsCard, { type Finding, type Review } from './FindingsCard';
+import CustomerLogo from './CustomerLogo';
 import GateCard from './GateCard';
 
 const API = process.env.NEXT_PUBLIC_API ?? 'http://127.0.0.1:3000/api';
@@ -103,6 +104,7 @@ interface Opportunity {
   shutdownRequirementHours: number | null;
   engineeringReviewComplete: boolean;
   shutdownFeasible: boolean;
+  customerLogo: string | null;
   artifacts: {
     id: string;
     originalFilename: string;
@@ -243,6 +245,13 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
         <button onClick={run} disabled={busy}>
           {busy ? 'Analyzing…' : analysis ? 'Re-analyze' : 'Run analysis'}
         </button>
+        <CustomerLogo
+          opportunityId={id}
+          customerLogo={opportunity.customerLogo}
+          customerName={opportunity.customerName}
+          role={sessionUser()?.role ?? 'VIEWER'}
+          onChange={load}
+        />
         {error && <p className="error">{error}</p>}
       </div>
 

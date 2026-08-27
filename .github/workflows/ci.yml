@@ -64,6 +64,8 @@ jobs:
       - run: node --test services/api/dist/uploads.test.js
       # Assumptions and exclusions, including the separation of duties.
       - run: node --test services/api/dist/commercial.test.js
+      # Branding, including the logo scheme validation.
+      - run: node --test services/api/dist/branding.test.js
 
   web:
     runs-on: ubuntu-latest

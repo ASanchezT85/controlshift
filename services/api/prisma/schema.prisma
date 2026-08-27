@@ -19,9 +19,12 @@ model Tenant {
 
   // Report branding (MASTER SPEC 39). B2B2B: the integrator's name goes on the
   // cover, the end customer's name comes from the opportunity.
-  brandName   String?
-  brandLogo   String? // data: URI, kept small on purpose
+  brandName    String?
+  brandLogo    String? // data: URI, size-capped and raster-only
   reportFooter String?
+  /// Line under the preparer's name on every cover, e.g. a department or a
+  /// professional registration. Optional (SPEC 39).
+  preparedByLine String?
 
   // Organization estimating policy (SPEC 32/33). Owned by the organization,
   // never by ControlShift.
@@ -112,6 +115,9 @@ model Opportunity {
 
   shutdownRequirementHours Float?
   commercialNotes          String?
+
+  /// The end customer's logo, for B2B2B delivery. Optional (SPEC 39).
+  customerLogo String?
 
   // Human determinations that feed the SPEC 35 gate. False until a person
   // says otherwise - the engine never assumes them.
