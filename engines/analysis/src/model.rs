@@ -133,6 +133,8 @@ pub struct BomLine {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct WorkPackageRef {
     pub code: String,
+    /// The proposal section this work belongs in (MASTER SPEC 28).
+    pub section: String,
     pub unit_type: String,
     pub quantity: u32,
     pub triggered_by: Vec<String>,

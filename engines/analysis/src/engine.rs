@@ -15,11 +15,21 @@ use std::collections::{BTreeMap, BTreeSet};
 #[derive(Debug, Deserialize)]
 pub struct RulePack {
     pub id: String,
+    #[serde(default)]
+    pub scope_sections: ScopeSections,
     pub coverage_domains: Vec<CoverageDomain>,
     pub discontinued_processors: Vec<String>,
     pub io_mapping: Vec<IoMapping>,
     pub rules: Vec<Rule>,
     pub quote_readiness_policy: Policy,
+}
+
+#[derive(Debug, Default, Deserialize)]
+pub struct ScopeSections {
+    #[serde(default)]
+    pub order: Vec<String>,
+    #[serde(default)]
+    pub assign: BTreeMap<String, String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -374,7 +384,7 @@ pub fn analyze(
     }
 
     let dependencies = dependencies(&sys);
-    let work_packages = work_packages(&findings);
+    let work_packages = work_packages(&findings, pack);
     let candidate_bom = candidate_bom(pack, &sys);
     let migration_paths = migration_paths(pack, &findings);
     let quote_readiness = readiness(pack, &cov, &findings, &unknowns, req);
@@ -476,7 +486,7 @@ fn add_module_edge(
 /// same package in DIFFERENT units are different lines: 2 instruction rewrites
 /// and 11 indirect references are not 13 of anything. Summing them once
 /// produced a 13-unit line that priced two IIM rewrites as thirteen.
-fn work_packages(findings: &[Finding]) -> Vec<WorkPackageRef> {
+fn work_packages(findings: &[Finding], pack: &RulePack) -> Vec<WorkPackageRef> {
     let mut acc: BTreeMap<(String, String), (u32, Vec<String>)> = BTreeMap::new();
     for f in findings {
         let unit = f.unit_type.clone();
@@ -489,6 +499,14 @@ fn work_packages(findings: &[Finding]) -> Vec<WorkPackageRef> {
     acc.into_iter()
         .map(
             |((code, unit_type), (quantity, triggered_by))| WorkPackageRef {
+                // A package with no section would vanish from the proposal it
+                // belongs in, so an unmapped one is named rather than dropped.
+                section: pack
+                    .scope_sections
+                    .assign
+                    .get(&code)
+                    .cloned()
+                    .unwrap_or_else(|| "UNASSIGNED".into()),
                 code,
                 unit_type,
                 quantity,

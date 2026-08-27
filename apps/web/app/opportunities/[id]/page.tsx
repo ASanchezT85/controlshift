@@ -9,6 +9,7 @@ import FindingsCard, { type Finding, type Review } from './FindingsCard';
 import CustomerLogo from './CustomerLogo';
 import DependencyCard from './DependencyCard';
 import GateCard from './GateCard';
+import ScopeCard from './ScopeCard';
 
 const API = process.env.NEXT_PUBLIC_API ?? 'http://127.0.0.1:3000/api';
 
@@ -75,7 +76,13 @@ interface AnalysisResult {
     blocking_findings: string[];
     notes: string[];
   }[];
-  work_packages: { code: string; unit_type: string; quantity: number; triggered_by: string[] }[];
+  work_packages: {
+    code: string;
+    section: string;
+    unit_type: string;
+    quantity: number;
+    triggered_by: string[];
+  }[];
   candidate_bom: { catalog: string; quantity: number; replaces: string; state: string }[];
   quote_readiness: {
     fixed_price: string;
@@ -453,145 +460,7 @@ export default function OpportunityPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
 
-          <div className="card">
-            <h2>Work packages</h2>
-            <div className="scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Package</th>
-                    <th>Qty</th>
-                    <th>Unit</th>
-                    <th>Triggered by</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {r.work_packages.map((w) => (
-                    <tr key={`${w.code}-${w.unit_type}`}>
-                      <td>{w.code.replace(/_/g, ' ')}</td>
-                      <td>{w.quantity}</td>
-                      <td className="muted">{w.unit_type.toLowerCase()}</td>
-                      <td className="muted">{w.triggered_by.join(', ')}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {estimate && (
-            <div className="card">
-              <h2>Estimate range</h2>
-              <div className="scroll">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Work package</th>
-                      <th>Role</th>
-                      <th>Qty</th>
-                      <th>Unit</th>
-                      <th>Min h</th>
-                      <th>Max h</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {estimate.lines.map((l) => (
-                      <tr key={`${l.workPackageCode}-${l.unitType}`}>
-                        <td>{l.workPackageCode.replace(/_/g, ' ')}</td>
-                        <td className="muted">{l.role.replace(/_/g, ' ').toLowerCase()}</td>
-                        <td>{l.quantity}</td>
-                        <td className="muted">{l.unitType.toLowerCase()}</td>
-                        <td>{l.minHours}</td>
-                        <td>{l.maxHours}</td>
-                      </tr>
-                    ))}
-                    <tr>
-                      <td colSpan={4}>
-                        <strong>Priced subtotal</strong>
-                      </td>
-                      <td>
-                        <strong>{estimate.totals.minHours}</strong>
-                      </td>
-                      <td>
-                        <strong>{estimate.totals.maxHours}</strong>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={4} className="muted">
-                        With {estimate.totals.uncertaintyAllowancePercent}% uncertainty allowance
-                      </td>
-                      <td>{estimate.totals.minHoursWithAllowance}</td>
-                      <td>{estimate.totals.maxHoursWithAllowance}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              {estimate.unpriced.length > 0 && (
-                <>
-                  <p className="notice">
-                    Not priced, excluded from the range above — this is not zero-hour work:{' '}
-                    {estimate.unpriced
-                      .map((u) => `${u.workPackageCode.replace(/_/g, ' ')} (${u.quantity} ${u.unitType.toLowerCase()})`)
-                      .join(', ')}
-                  </p>
-                </>
-              )}
-              <ul className="muted" style={{ fontSize: 13 }}>
-                {estimate.caveats.map((c) => (
-                  <li key={c}>{c}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <CommercialCard
-            opportunityId={id}
-            role={sessionUser()?.role ?? 'VIEWER'}
-            assumptions={commercial.assumptions}
-            exclusions={commercial.exclusions}
-            hasAnalysis={!!analysis}
-            onChange={load}
-          />
-
-          <div className="card">
-            <h2>Deliverables</h2>
-            <p style={{ marginTop: 0, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {REPORT_KINDS.map(([kind, label]) => (
-                <button key={kind} className="ghost" disabled={!!generating} onClick={() => generate(kind)}>
-                  {generating === kind ? 'Generating…' : `Generate ${label}`}
-                </button>
-              ))}
-            </p>
-            {reports.length === 0 && <p className="muted">No documents generated yet.</p>}
-            {reports.length > 0 && (
-              <div className="scroll">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Document</th>
-                      <th>Generated</th>
-                      <th>Size</th>
-                      <th />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reports.map((rep) => (
-                      <tr key={rep.id}>
-                        <td>{rep.kind.replace(/_/g, ' ')}</td>
-                        <td className="muted">{new Date(rep.createdAt).toLocaleString()}</td>
-                        <td className="muted">{Math.round(rep.sizeBytes / 1024)} kB</td>
-                        <td>
-                          <button className="ghost" onClick={() => openReport(rep.id)}>
-                            Open
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+          <ScopeCard workPackages={r.work_packages} findings={r.findings} />
 
           <p className="muted" style={{ fontSize: 12 }}>
             rule pack {analysis!.rulePackVersion} · engine {analysis!.analysisEngineVersion} ·

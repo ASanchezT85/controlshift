@@ -39,6 +39,22 @@ const esc = (v: unknown): string =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
+/// MASTER SPEC 28 order. An empty section is printed as empty: leaving it out
+/// would read as an oversight rather than as a decision.
+const SCOPE_SECTIONS = [
+  'Discovery',
+  'Controls Design',
+  'PLC Software',
+  'Networks',
+  'HMI',
+  'Drives',
+  'Panel',
+  'Testing',
+  'Site',
+  'Documentation',
+  'Project Management',
+];
+
 const TITLES: Record<ReportKind, string> = {
   ENGINEERING_PREFLIGHT: 'Engineering Preflight',
   PROPOSAL_INPUT_PACKAGE: 'Proposal Input Package',
@@ -265,14 +281,23 @@ function proposalInputPackage(ctx: Ctx): string {
       : 'No shutdown requirement supplied.'}</p>
 
 <h2>Engineering scope</h2>
-<table><thead><tr><th>Work package</th><th>Units</th><th>Why it is in scope</th></tr></thead><tbody>
-${r.work_packages
-      .map(
-        (w: any) =>
-          `<tr><td>${esc(w.code.replace(/_/g, ' '))}</td><td>${w.quantity}</td>
-            <td class="trace">${trace(w.triggered_by ?? [])}</td></tr>`,
-      )
-      .join('')}
+<table><thead><tr><th>Work package</th><th>Qty</th><th>Unit</th><th>Why it is in scope</th></tr></thead><tbody>
+${SCOPE_SECTIONS.map((section) => {
+      const items = (r.work_packages ?? []).filter((w: any) => w.section === section);
+      return (
+        `<tr><td colspan="4"><strong>${esc(section)}</strong>` +
+        (items.length ? '' : ' <span class="muted">- nothing scoped here</span>') +
+        `</td></tr>` +
+        items
+          .map(
+            (w: any) =>
+              `<tr><td style="padding-left:22px">${esc(w.code.replace(/_/g, ' '))}</td>
+                <td>${w.quantity}</td><td class="muted">${esc(w.unit_type.toLowerCase())}</td>
+                <td class="trace">${trace(w.triggered_by ?? [])}</td></tr>`,
+          )
+          .join('')
+      );
+    }).join('')}
 </tbody></table>
 
 <h2>Estimate range</h2>

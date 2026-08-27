@@ -417,3 +417,55 @@ fn findings_and_the_dependency_graph_share_one_namespace() {
         .iter()
         .any(|d| d["from"] == sdn && d["to"] == "network:DeviceNet"));
 }
+
+/// Every work package must land in a MASTER SPEC 28 section. One that does not
+/// would still be raised by a rule, still be priced, and then be missing from
+/// the proposal it belongs in - scope that quietly goes nowhere.
+#[test]
+fn every_work_package_lands_in_a_scope_section() {
+    let (r, _) = run();
+    let sections = [
+        "Discovery",
+        "Controls Design",
+        "PLC Software",
+        "Networks",
+        "HMI",
+        "Drives",
+        "Panel",
+        "Testing",
+        "Site",
+        "Documentation",
+        "Project Management",
+    ];
+    let packages = r["work_packages"].as_array().unwrap();
+    assert!(!packages.is_empty());
+    for w in packages {
+        let section = w["section"].as_str().unwrap();
+        assert!(
+            sections.contains(&section),
+            "{} is in `{section}`, which is not a SPEC 28 section",
+            w["code"]
+        );
+    }
+
+    // The unevidenced scope must not quietly land in a delivery section: HMI
+    // and Drives work is Discovery until somebody supplies the evidence.
+    let discovery: Vec<&str> = packages
+        .iter()
+        .filter(|w| w["section"] == "Discovery")
+        .flat_map(|w| w["triggered_by"].as_array().unwrap())
+        .map(|v| v.as_str().unwrap())
+        .collect();
+    for id in ["HMI-001", "DRV-001", "SAF-001"] {
+        assert!(
+            discovery.contains(&id),
+            "{id} must generate discovery, not delivery"
+        );
+    }
+    assert!(
+        !packages
+            .iter()
+            .any(|w| w["section"] == "HMI" || w["section"] == "Drives"),
+        "no HMI or drive delivery work may be scoped from unevidenced scope"
+    );
+}

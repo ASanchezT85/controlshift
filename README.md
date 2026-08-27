@@ -93,6 +93,26 @@ Two things the console deliberately makes visible rather than smoothing over:
   determinations recorded on the analysis against the ones in force now and
   asks for a re-analysis instead of silently showing an old answer.
 
+## Scope Builder
+
+Scope is organised into the eleven sections of SPEC 28, and every line answers
+*why is this in scope?* with the chain the spec asks for:
+
+```
+unsupported instruction rewrite   2 instruction
+  SW-003  2 IIM instances require manual rewrite
+  <- RA-2026.08::SW-003 <- STRUCTURED_PARSE; 1756-RM085
+```
+
+Two sections read **"nothing scoped here"** on GO-001: HMI and Drives. That is
+the product working. Unevidenced scope generates discovery, never delivery, and
+printing the empty section says so — leaving it out would read as an oversight
+rather than a decision.
+
+The section map lives in the rule pack, so it is versioned with the rules. A
+Rust test fails if any work package a rule can raise has no section: it would
+still be raised, still be priced, and then be missing from the proposal.
+
 ## Dependency graph
 
 Drawn as impact propagation, not as a hairball. 488 edges rendered at once tell

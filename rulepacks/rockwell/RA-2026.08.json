@@ -717,5 +717,38 @@
       "max_unresolved_blockers": 99,
       "min_weighted_coverage_percent": 50
     }
+  },
+  "scope_sections": {
+    "order": [
+      "Discovery",
+      "Controls Design",
+      "PLC Software",
+      "Networks",
+      "HMI",
+      "Drives",
+      "Panel",
+      "Testing",
+      "Site",
+      "Documentation",
+      "Project Management"
+    ],
+    "assign": {
+      "DISCOVERY": "Discovery",
+      "CONTROLS_DESIGN": "Controls Design",
+      "IO_MIGRATION_DESIGN": "Controls Design",
+      "PLC_PROGRAM_REVIEW": "PLC Software",
+      "UNSUPPORTED_INSTRUCTION_REWRITE": "PLC Software",
+      "PID_VALIDATION": "PLC Software",
+      "MSG_RECONFIGURATION": "PLC Software",
+      "PLC_COMMUNICATION_REVIEW": "Networks",
+      "DEVICENET_MIGRATION": "Networks",
+      "NET_DEVICE_MIGRATION": "Networks",
+      "PANEL_RETROFIT": "Panel",
+      "FAT": "Testing",
+      "COMMUNICATION_FAT": "Testing",
+      "IO_CHECKOUT": "Site",
+      "COMMISSIONING": "Site",
+      "DOCUMENTATION_UPDATE": "Documentation"
+    }
   }
 }

@@ -219,7 +219,18 @@ def main():
           ]["state"] == "BLOCKED",
           "the original finding state is untouched")
 
-    print("\n6. ESTIMATE")
+    print("\n6. SCOPE (SPEC 28)")
+    sections = ["Discovery", "Controls Design", "PLC Software", "Networks", "HMI", "Drives",
+                "Panel", "Testing", "Site", "Documentation", "Project Management"]
+    packages = result["work_packages"]
+    check(all(w["section"] in sections for w in packages),
+          "every work package lands in a spec section", f"{len(packages)} packages")
+    check(not any(w["section"] in ("HMI", "Drives") for w in packages),
+          "unevidenced HMI and drive scope produces discovery, not delivery")
+    check(all(w["triggered_by"] for w in packages),
+          "every scope line traces back to the finding that raised it")
+
+    print("\n7. ESTIMATE")
     estimate = api.request("GET", f"/opportunities/{oid}/estimate", who="estimator")
     iim = next(l for l in estimate["lines"]
                if l["workPackageCode"] == "UNSUPPORTED_INSTRUCTION_REWRITE"
