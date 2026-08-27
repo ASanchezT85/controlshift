@@ -15,6 +15,7 @@ industrial protocol library in the dependency tree to do it with.
 ![api](https://img.shields.io/badge/api-Node%2022%20%C2%B7%20NestJS-3178c6)
 ![db](https://img.shields.io/badge/db-PostgreSQL%2017-336791)
 ![status](https://img.shields.io/badge/status-V1%20in%20progress-8a5a00)
+![license](https://img.shields.io/badge/license-MIT-1e6b3a)
 
 ---
 
@@ -291,4 +292,9 @@ No semantic versioning, no compatibility promise, no releases.
 
 ## License
 
-Not yet licensed. All rights reserved until a license is chosen.
+MIT. See [LICENSE](LICENSE).
+
+The rule packs carry OEM publication numbers as citations, not content: a rule
+records that `1756-RM085` is the basis for a finding, it does not reproduce
+Rockwell's documentation. The golden dataset is synthetic and owned by this
+project.
