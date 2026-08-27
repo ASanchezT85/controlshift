@@ -34,6 +34,17 @@ Adding a golden case is adding two files - `source.SLC` and `case.json` - under
 `golden/atomic/` or `golden/composite/`. No Rust change. The suite refuses a rule
 with no positive and negative fixture, and refuses a case that asserts nothing.
 
+```bash
+python scripts/e2e_go001.py
+```
+
+runs GO-001 through the **running product**: an opportunity created over HTTP,
+ten artifacts uploaded through the real ingestion pipeline and scanned by
+whatever clamd the API points at, analysis, review, commercial propositions,
+estimate, all three deliverables and the audit trail. 66 assertions, nothing
+mocked and nothing inserted behind the API's back. The Rust suite proves the
+engine; this proves the product.
+
 `cargo test` includes the GO-001 acceptance suite: every mandatory finding of
 SPEC 60, the three migration paths of SPEC 61, the commercial decision of
 SPEC 62, and one test per failure condition of SPEC 63. A false-safe result
@@ -162,9 +173,13 @@ POST /artifacts (clean)  ->  201, processingStatus SCANNED
 `scripts/smoke_scanner.sh` re-proves that against whatever clamd `CLAMD_HOST`
 points at. See `docs/scanner-setup.md` for the two ways to get one running.
 - **Intake refuses rather than inspects.** Archives and executables are rejected
-  by extension; nothing is unpacked, so there is no archive bomb to bound. The
-  extension only *suggests* a type - a PDF is an electrical drawing or a network
-  sketch depending on what it actually is, so the uploader can declare it.
+  by extension; nothing is unpacked, so there is no archive bomb to bound.
+- **An extension never decides a type that moves the verdict.** A `.pdf` lands
+  as unclassified, contributing no evidence, until somebody says which drawing
+  it is. Inferring ELECTRICAL_DRAWING from a network sketch dropped NETWORK
+  coverage from 33% to 0, weighted coverage from 54% to 47%, and flipped
+  BUDGETARY from READY WITH ALLOWANCES to NOT READY — with nobody typing
+  anything wrong. The end-to-end run found that.
 
 ## Known ceilings
 

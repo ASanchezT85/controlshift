@@ -68,6 +68,12 @@ jobs:
       - run: node --test services/api/dist/branding.test.js
       # The clamd protocol is hand-written and must fail closed.
       - run: node --test services/api/dist/scanner.test.js
+      # The whole product, end to end: upload, scan, analyse, review, price,
+      # report. Runs against the API it starts itself.
+      - run: |
+          node services/api/dist/seed.js
+          node services/api/dist/main.js & sleep 5
+          python scripts/e2e_go001.py
 
   web:
     runs-on: ubuntu-latest

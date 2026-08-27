@@ -23,12 +23,21 @@ import { ScannerModule, ScannerService } from './scanner';
 /// SPEC 12: size ceiling, extension allowlist, hash, immutable store.
 export const MAX_ARTIFACT_BYTES = Number(process.env.MAX_ARTIFACT_BYTES ?? 100 * 1024 * 1024);
 
+/// What an extension is allowed to imply. A guess here feeds an evidence
+/// domain, and an evidence domain moves the commercial verdict - so an
+/// extension that cannot pin the type down resolves to OTHER, which
+/// contributes no evidence until a person declares what the file is.
+///
+/// `.pdf` is the case that taught us: inferring ELECTRICAL_DRAWING from a
+/// network sketch dropped NETWORK coverage from 33% to 0, weighted coverage
+/// from 54% to 47%, and flipped BUDGETARY from READY WITH ALLOWANCES to NOT
+/// READY. Nobody typed anything wrong; the file was just a PDF.
 const ALLOWED: Record<string, ArtifactType> = {
   slc: ArtifactType.PLC_SOURCE,
   csv: ArtifactType.SYMBOL_DATABASE,
   xlsx: ArtifactType.IO_LIST,
   xls: ArtifactType.IO_LIST,
-  pdf: ArtifactType.ELECTRICAL_DRAWING,
+  pdf: ArtifactType.OTHER,
   txt: ArtifactType.CUSTOMER_NOTE,
   jpg: ArtifactType.PHOTO,
   jpeg: ArtifactType.PHOTO,

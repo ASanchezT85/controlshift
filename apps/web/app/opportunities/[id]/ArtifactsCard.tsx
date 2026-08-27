@@ -85,6 +85,9 @@ export default function ArtifactsCard({
   };
 
   const unscanned = artifacts.filter((a) => a.processingStatus === 'RECEIVED');
+  // An OTHER artifact is stored and scanned but feeds no evidence domain, so it
+  // cannot raise coverage until somebody says what it is.
+  const unclassified = artifacts.filter((a) => a.artifactType === 'OTHER');
 
   return (
     <div className="card">
@@ -154,6 +157,15 @@ export default function ArtifactsCard({
         </p>
       )}
 
+      {unclassified.length > 0 && (
+        <p className="notice">
+          {unclassified.length} artifact{unclassified.length > 1 ? 's are' : ' is'} unclassified and
+          therefore counts as no evidence. A PDF can be an electrical drawing, a network sketch or a
+          report, and which one it is moves the coverage that decides quote readiness — so the
+          extension is not allowed to guess. Re-upload with a type selected.
+        </p>
+      )}
+
       {artifacts.length > 0 && (
         <div className="scroll">
           <table>
@@ -169,7 +181,11 @@ export default function ArtifactsCard({
               {artifacts.map((a) => (
                 <tr key={a.id}>
                   <td>{a.originalFilename}</td>
-                  <td className="muted">{a.artifactType.replace(/_/g, ' ').toLowerCase()}</td>
+                  <td className={a.artifactType === 'OTHER' ? 'state UNKNOWN' : 'muted'}>
+                    {a.artifactType === 'OTHER'
+                      ? 'UNCLASSIFIED'
+                      : a.artifactType.replace(/_/g, ' ').toLowerCase()}
+                  </td>
                   <td className="muted">{kb(a.size)}</td>
                   <td>
                     <span className={`state ${a.processingStatus === 'SCANNED' ? 'PASS' : 'UNKNOWN'}`}>
