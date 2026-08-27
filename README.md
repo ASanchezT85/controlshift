@@ -125,6 +125,24 @@ JPEG, GIF or WEBP, capped at 256 kB. **SVG is refused** — it is a document
 format that can carry script. The cover prints the preparer's name, never their
 login.
 
+## The seed uses the product, not the database
+
+An earlier seed wrote artifact rows straight to Postgres. That walked around
+seven intake controls at once — the extension allowlist, the refused
+extensions, the guidance for a `.RSS`, the empty-file check, the size ceiling,
+the write-once object store and the audit trail — and forced
+`processingStatus: SCANNED` on files no scanner had ever seen. Every suite
+built on that seed was passing over data no user could have produced.
+
+The seed now boots a Nest application context and calls `ArtifactsService` and
+`BrandingService`, the same objects the HTTP layer calls. It inherits every
+control automatically and cannot drift from them. A fresh seed against a live
+scanner produces ten really-scanned artifacts and eleven audit events that did
+not exist before.
+
+If no scanner is running the seeded artifacts land `RECEIVED` and analysis
+refuses them — and the seed says so instead of papering over it.
+
 ## Application-layer boundaries
 
 - **Tenancy and RBAC are tested, not asserted.** `services/api/src/tenancy.test.ts`

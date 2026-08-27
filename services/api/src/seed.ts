@@ -4,14 +4,15 @@
  *
  *   npm run build && node dist/seed.js
  */
-import { ArtifactType, PrismaClient, ProposalType, Role } from '@prisma/client';
-import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
-import { hashPassword } from './auth';
+import { NestFactory } from '@nestjs/core';
+import { PrismaClient, ProposalType, Role } from '@prisma/client';
+import { readFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { AppModule } from './app.module';
+import { ArtifactsService } from './artifacts';
+import { BrandingService } from './branding';
+import { hashPassword, type Principal } from './auth';
 import { STARTER_TEMPLATES } from './estimating';
-import { storageRoot } from './artifacts';
 
 const prisma = new PrismaClient();
 
@@ -38,16 +39,6 @@ async function main() {
   const tenant =
     (await prisma.tenant.findFirst({ where: { name: 'Northstar Integrators' } })) ??
     (await prisma.tenant.create({ data: { name: 'Northstar Integrators' } }));
-
-  await prisma.tenant.update({
-    where: { id: tenant.id },
-    data: {
-      brandName: 'Northstar Integrators',
-      preparedByLine: 'Controls Engineering - P.Eng. 41208',
-      reportFooter:
-        'Northstar Integrators - preflight assessment - not for construction or procurement',
-    },
-  });
 
   // Starter effort templates. They belong to the organization from the moment
   // they are written and are expected to be replaced with its real numbers.
@@ -97,40 +88,72 @@ async function main() {
     });
   }
 
+  // Artifacts go through the SAME service the HTTP upload uses. A seed that
+  // writes rows directly walks around the extension allowlist, the size
+  // ceiling, the write-once store, the malware scan and the audit trail - and
+  // then every test built on it passes over data no user could have produced.
+  const context = await NestFactory.createApplicationContext(AppModule, { logger: false });
+  const artifacts = context.get(ArtifactsService);
+  const seeder = await prisma.user.findFirstOrThrow({
+    where: { tenantId: tenant.id, role: Role.CONTROLS_ENGINEER },
+  });
+  const principal: Principal = {
+    userId: seeder.id,
+    tenantId: tenant.id,
+    role: seeder.role,
+    email: seeder.email,
+  };
+
+  // Branding through the same service the admin screen uses, so the logo
+  // validation and the audit event are the ones the product actually runs.
+  const admin = await prisma.user.findFirstOrThrow({
+    where: { tenantId: tenant.id, role: Role.ORG_ADMIN },
+  });
+  await context.get(BrandingService).update(
+    { userId: admin.id, tenantId: tenant.id, role: admin.role, email: admin.email },
+    {
+      brandName: 'Northstar Integrators',
+      preparedByLine: 'Controls Engineering - P.Eng. 41208',
+      reportFooter:
+        'Northstar Integrators - preflight assessment - not for construction or procurement',
+    },
+  );
+
   const manifest = JSON.parse(await readFile(join(GOLDEN, 'manifest.json'), 'utf8'));
+  const statuses: string[] = [];
   for (const entry of manifest.artifacts) {
     const bytes = await readFile(join(GOLDEN, entry.path));
-    const sha256 = createHash('sha256').update(bytes).digest('hex');
-    const relative = join('original', tenant.id, sha256.slice(0, 2), sha256);
-    const absolute = join(storageRoot(), relative);
-    if (!existsSync(absolute)) {
-      await mkdir(dirname(absolute), { recursive: true });
-      await writeFile(absolute, bytes);
-    }
     const filename = entry.path.split('/').pop()!;
-    const existing = await prisma.artifact.findFirst({
-      where: { opportunityId: opportunity.id, sha256 },
-    });
-    if (!existing) {
-      await prisma.artifact.create({
-        data: {
-          opportunityId: opportunity.id,
-          originalFilename: filename,
-          mediaType: 'application/octet-stream',
-          artifactType: (entry.artifact_type as ArtifactType) ?? ArtifactType.OTHER,
-          sha256,
-          size: bytes.length,
-          storageLocation: relative.split('\\').join('/'),
-          // Seeded artifacts are ours, not customer uploads: they are the only
-          // files in the system that may skip the scanning gate.
-          processingStatus: 'SCANNED',
-        },
-      });
-    }
+    // The manifest type is DECLARED, exactly as a person declares it in the
+    // upload form. The extension is never allowed to decide a type that feeds
+    // an evidence domain.
+    const artifact = await artifacts.upload(
+      principal,
+      opportunity.id,
+      filename,
+      'application/octet-stream',
+      bytes,
+      entry.artifact_type,
+    );
+    statuses.push(artifact.processingStatus);
   }
+  await context.close();
+
+  const unscanned = statuses.filter((s) => s !== 'SCANNED').length;
 
   console.log(`seeded tenant ${tenant.id}`);
   console.log(`opportunity ${opportunity.id} with ${manifest.artifacts.length} artifacts`);
+  if (unscanned > 0) {
+    console.log(
+      [
+        '',
+        `  ${unscanned} artifact(s) did not clear malware scanning, so analysis will`,
+        '  refuse them. That is the product working, not the seed failing.',
+        '  Start a scanner (docs/scanner-setup.md) and re-run, or set',
+        '  ALLOW_UNSCANNED_ARTIFACTS=true for a development environment.',
+      ].join('\n'),
+    );
+  }
   console.log(`users: ${USERS.map(([e]) => e).join(', ')}`);
   console.log(`password: ${PASSWORD}`);
 }

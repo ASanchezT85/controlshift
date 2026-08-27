@@ -104,6 +104,11 @@ before(async () => {
   });
   opportunityId = opportunity.id;
 
+  // Artifacts are inserted directly here on purpose: this suite exercises a
+  // layer downstream of intake, and the real ingestion path (allowlist,
+  // size ceiling, scanner, audit) is covered by uploads.test.ts and
+  // scripts/e2e_go001.py. The declared type matches what a person selects
+  // in the upload form, so no unreachable state is encoded.
   const manifest = JSON.parse(await readFile(join(GOLDEN, 'manifest.json'), 'utf8'));
   for (const entry of manifest.artifacts) {
     const bytes = await readFile(join(GOLDEN, entry.path));
