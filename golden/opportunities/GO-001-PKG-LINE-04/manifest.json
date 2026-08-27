@@ -52,8 +52,8 @@
     {
       "path": "artifacts/PKG04_IO_LIST.xlsx",
       "artifact_type": "IO_LIST",
-      "sha256": "b33596f0c7fb99e2f52ed506516db6eb908b4054cef15904a8d674498b37ae31",
-      "size": 5284
+      "sha256": "ed258f5a160e3e895dc620063f4415c186f29446835c8b789699138fbf45badb",
+      "size": 5296
     },
     {
       "path": "artifacts/PKG04_SYMBOLS.CSV",

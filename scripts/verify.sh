@@ -58,6 +58,22 @@ else
     && ok "clippy" || bad "clippy" "rust: clippy"
 fi
 
+# ------------------------------------------------------------------- golden
+# The golden has to be reproducible byte for byte or it is not a fixture. This
+# caught a real one: openpyxl stamps the time into the workbook, so every
+# regeneration changed the file and its hash in the manifest.
+say "golden dataset"
+if python scripts/gen_go001.py >/dev/null 2>&1; then
+  if [ -z "$(git status --short golden/)" ]; then
+    ok "regenerates byte for byte"
+  else
+    git status --short golden/ | head -3 | sed 's/^/     /'
+    bad "regenerating changes files - the golden is not reproducible" "golden: drift"
+  fi
+else
+  bad "generator failed (does it still match MASTER SPEC 59?)" "golden: generator"
+fi
+
 # ---------------------------------------------------------------------- api
 say "api (TypeScript, against the real database)"
 cd "$ROOT/services/api"

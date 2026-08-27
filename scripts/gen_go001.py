@@ -9,9 +9,13 @@ actually contains those counts -- if the spec numbers and the emitted text ever
 disagree, this script fails instead of quietly shipping a wrong golden.
 """
 import csv
+import datetime
 import hashlib
+import io as _io
+import zipfile
 import json
 import pathlib
+import re
 import sys
 
 OUT = pathlib.Path(__file__).resolve().parents[1] / "golden" / "opportunities" / "GO-001-PKG-LINE-04"
@@ -268,6 +272,40 @@ Customer notes, transcribed from the walkdown call.
 """
 
 
+# An xlsx is a zip, and both openpyxl's document properties and the zip entry
+# timestamps default to "now". Either one changes the bytes on every run and the
+# sha256 in the manifest with them, so the golden could never be a fixture.
+PINNED = datetime.datetime(2026, 8, 27, 0, 0, 0)
+
+
+ISO = PINNED.strftime("%Y-%m-%dT%H:%M:%SZ")
+DATE_TAG = re.compile(rb"(<dcterms:(?:created|modified)[^>]*>)[^<]*(</dcterms:)")
+
+
+def save_deterministic_xlsx(wb, path):
+    wb.properties.creator = "ControlShift golden generator"
+
+    buffer = _io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    stamp = (PINNED.year, PINNED.month, PINNED.day, PINNED.hour, PINNED.minute, PINNED.second)
+    with zipfile.ZipFile(buffer) as src, zipfile.ZipFile(
+        path, "w", zipfile.ZIP_DEFLATED
+    ) as out:
+        for item in src.infolist():
+            data = src.read(item.filename)
+            if item.filename == "docProps/core.xml":
+                # openpyxl overwrites `modified` at save time, so pinning the
+                # property beforehand does nothing: the timestamp is replaced
+                # here, in the bytes it actually wrote.
+                data = DATE_TAG.sub(rb"\g<1>" + ISO.encode() + rb"\g<2>", data)
+            info = zipfile.ZipInfo(item.filename, date_time=stamp)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = item.external_attr
+            out.writestr(info, data)
+
+
 def minimal_pdf(path, title, lines):
     """Smallest valid PDF that opens: one page, Helvetica, no dependencies."""
     body = "BT /F1 11 Tf 50 760 Td 14 TL\n"
@@ -327,13 +365,22 @@ def main():
         w.writerows(SYMBOLS)
 
     import openpyxl
+
     wb = openpyxl.Workbook()
+    # openpyxl stamps the current time into docProps/core.xml, which changes the
+    # file's bytes on every run and its sha256 in the manifest with them. The
+    # golden has to be reproducible byte for byte or it cannot be a fixture, so
+    # the timestamps are pinned to the date this opportunity is dated.
+    pinned = datetime.datetime(2026, 8, 27, 0, 0, 0)
+    wb.properties.created = pinned
+    wb.properties.modified = pinned
+    wb.properties.creator = "ControlShift golden generator"
     ws = wb.active
     ws.title = "IO List"
     ws.append(["Slot", "Catalog", "Points", "Address Range", "Description"])
     for row in IO_LIST:
         ws.append(list(row))
-    wb.save(SRC / "PKG04_IO_LIST.xlsx")
+    save_deterministic_xlsx(wb, SRC / "PKG04_IO_LIST.xlsx")
 
     minimal_pdf(SRC / "ELECTRICAL_REV_C.pdf",
                 "PKG-LINE-04 ELECTRICAL - REV C - 2014-06-11", [
