@@ -125,6 +125,21 @@ JPEG, GIF or WEBP, capped at 256 kB. **SVG is refused** — it is a document
 format that can carry script. The cover prints the preparer's name, never their
 login.
 
+## The suites are mutation-tested, not just green
+
+Green proves nothing on its own. Each invariant that matters was broken on
+purpose and the suite had to notice:
+
+| Invariant broken | Result |
+|---|---|
+| Analysis stops checking the scanning gate | `uploads` 1 failure |
+| Tenant scope stops filtering | `tenancy` 1 failure |
+| Logo validation returns everything unchanged | `branding` 2 failures |
+| Proposing also approves the exclusion | `commercial` 4 failures |
+| `SW-003` downgraded to PASS | GO-001 2 failures |
+| `evidence_absent` never fires | GO-001 6 failures |
+| `module_present` silenced | `G1-009`, `G2-001` fail by name |
+
 ## The seed uses the product, not the database
 
 An earlier seed wrote artifact rows straight to Postgres. That walked around

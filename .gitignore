@@ -4,3 +4,4 @@ dist/
 .next/
 storage/
 .env
+__pycache__/
